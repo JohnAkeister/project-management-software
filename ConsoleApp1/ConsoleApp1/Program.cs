@@ -145,16 +145,28 @@ namespace ConsoleApp1
             {
                 conn.ConnectionString = "Server=SQLDB ;Database=Database1 ; Trusted_Connection=true";
                 conn.Open();
-                SqlCommand command = new SqlCommand("SELECT * FROM Logins ORDER BY UserID",conn);
-                SqlCommand command1 = new SqlCommand("INSERT INTO Logins (UserID,Username,Password) VALUES(@0,@1,@2)", conn);
-                command1.Parameters.Add(new SqlParameter("0", UserID));
-                command1.Parameters.Add(new SqlParameter("1", UserName));
-                command1.Parameters.Add(new SqlParameter("2", UserPassword));
+                SqlCommand command = new SqlCommand("SELECT * FROM Logins WHERE Username = @0",conn);
+                command.Parameters.Add(new SqlParameter("0", UserName));
+                 using(SqlDataReader reader = command.ExecuteReader())
+                {
+                    Console.WriteLine("UserID\tUsername\tPassword");
+                    while (reader.Read())
+                    {
+                        if (reader[2].ToString() == UserPassword )
+                        {
+                            Console.WriteLine("Login Successfull");
+                        }
+                    }
+                }
+                
                 
             }
         }
     }
-    
+    /*SqlCommand command1 = new SqlCommand("INSERT INTO Logins (UserID,Username,Password) VALUES(@0,@1,@2)", conn);
+    command1.Parameters.Add(new SqlParameter("0", UserID));
+                command1.Parameters.Add(new SqlParameter("1", UserName)); code to create new user, will be useful for admin class
+                command1.Parameters.Add(new SqlParameter("2", UserPassword));*/
     class Task
     {
         private string TaskName;
