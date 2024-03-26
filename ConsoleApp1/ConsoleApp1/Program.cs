@@ -143,23 +143,33 @@ namespace ConsoleApp1
             this.onProject= project;
             using (SqlConnection conn = new SqlConnection())
             {
-                conn.ConnectionString = "Server=SQLDB ;Database=Database1 ; Trusted_Connection=true";
+                conn.ConnectionString = "Server=SQLEXPRESS ;Database=SQLDB ; Trusted_Connection=true";
                 conn.Open();
-                SqlCommand command = new SqlCommand("SELECT * FROM Logins WHERE Username = @0",conn);
-                command.Parameters.Add(new SqlParameter("0", UserName));
-                 using(SqlDataReader reader = command.ExecuteReader())
+                try
                 {
-                    Console.WriteLine("UserID\tUsername\tPassword");
-                    while (reader.Read())
+                    SqlCommand command = new SqlCommand("SELECT * FROM Logins WHERE Username = @0", conn);
+                    command.Parameters.Add(new SqlParameter("0", UserName));
+                    using (SqlDataReader reader = command.ExecuteReader())
                     {
-                        if (reader[2].ToString() == UserPassword )
+                        
+                        while (reader.Read())
                         {
-                            Console.WriteLine("Login Successfull");
+                            if (reader[2].ToString() == UserPassword)
+                            {
+                                Console.WriteLine("Login Successfull");
+                                Console.WriteLine("UserID\tUsername\tPassword");
+                                Console.WriteLine(String.Format("{0}\t|{1}\t{2}", reader[0], reader[1], reader[2]));
+                            }
                         }
                     }
                 }
-                
-                
+                catch (SqlException er)
+                {
+
+                    Console.WriteLine("Error in SQL Server, " + er.Message);
+                }
+
+
             }
         }
     }
