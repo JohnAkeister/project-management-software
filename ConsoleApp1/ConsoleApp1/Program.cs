@@ -37,18 +37,59 @@ namespace ConsoleApp1
             Login login = new Login();
             login.BeginLogin();
         }
+
         
     }
     class Validation
     {
-
+        public string readString(string prompt)//checks for null entry
+        {
+            string result;
+            do
+            {
+                Console.Write(prompt);
+                result = Console.ReadLine();
+            } while (result == "");
+            return result;
+        }
+        public int ReadInt(string enteredstring) // checks for an integer
+        {
+            do
+            {
+                int result;
+                bool valid = int.TryParse(enteredstring, out result);
+                if (valid)
+                {
+                    return result;
+                }
+                else
+                {
+                    enteredstring = readString("Invalid input! Please enter an integer: ");
+                }
+            } while (true);
+        }
+        public int CheckIntString(string prompt, int low, int high) // checks that the entered value is a non-null integer between two specified values
+        {
+            int result;
+            do
+            {
+                string intString = readString(prompt);
+                result = ReadInt(intString);
+                if (result < low || result > high)
+                {
+                    Console.WriteLine("Please enter an integer between " + low + " and " + high);
+                }
+            } while (result < low || result > high);
+            return result;
+        }
     }
     class Login
     {
+        Validation validation = new Validation();
         public void BeginLogin()
         {
             Console.WriteLine("Would you like to login to an user or admin account: \n1) User\n2) Admin");
-            int choice = Convert.ToInt32(Console.ReadLine());
+            int choice = validation.CheckIntString(Console.ReadLine(), 1, 2);
         }
     }
     class Task
