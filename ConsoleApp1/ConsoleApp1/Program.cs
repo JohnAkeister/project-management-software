@@ -16,14 +16,20 @@ namespace ConsoleApp1
         static Validation validation = new Validation();
         static Display display = new Display();
         static Login login = new Login();
+        static Admin admin = new Admin();
         static string usertype;
         static int maxusermenu = 5;
         int maxadminmenu = 5;
         static void Main()
         {
-            BeginProgram();
-            int ans=0;
+            BeginProgram();                    
+        }
+        public static void BeginProgram()
+        {      
+            usertype = login.BeginLogin();
+            int ans = 0;
             bool exit = false;
+            int adminmenu = 0;
             while (exit == false)
             {
                 if (usertype.ToLower() == "user")
@@ -47,15 +53,27 @@ namespace ConsoleApp1
                     case 2:
                         if (usertype == "user")
                         {
-                            display.DisplayUsers(); // CHANGE
+                            adminmenu = display.DisplayUsers(); // CHANGE
+                            switch (adminmenu)
+                            {
+                                case 1:
+                                    admin.AddUser();
+                                    break;
+                                case 2:
+                                    admin.DeleteUser();
+                                    break;
+                                default:
+                                    break;
+                            }
+                            
                         }
                         else
                         {
-                            display.DisplayUsers();
+                            adminmenu = display.DisplayUsers();
                         }
                         break;
                     case 3:
-                        break; 
+                        break;
                     case 4:
                         break;
                     case 5:
@@ -70,12 +88,6 @@ namespace ConsoleApp1
                         break;
                 }
             }
-            
-        }
-        public static void BeginProgram()
-        {      
-            usertype = login.BeginLogin();
-
         }
         static void DisplayUserMenu()
         {
@@ -92,11 +104,12 @@ namespace ConsoleApp1
     }
     class Display
     {
+        Validation validation = new Validation();
         public void DisplayNotification()
         {
 
         }
-        public void DisplayUsers() // displays all users to the admin
+        public int DisplayUsers() // displays all users to the admin
         {
             using (SqlConnection conn = new SqlConnection()) 
             {
@@ -104,11 +117,26 @@ namespace ConsoleApp1
                 conn.Open();
                 SqlCommand command1 = new SqlCommand("SELECT UserID, Username FROM Logins", conn);
                 SqlDataReader reader = command1.ExecuteReader();
+                Console.WriteLine("UserID\tUsername");
                 while (reader.Read())
                 {
-                    Console.WriteLine("UserID\tUsername");
-                    Console.WriteLine(String.Format("{0}\t | {1}",reader[0].ToString(), reader[1].ToString()));
+                    
+                    Console.WriteLine(String.Format("{0}\t | {1}",reader[0], reader[1]));
                 }
+            }
+            Console.WriteLine("\nMenu: \n1) Add a new user\n2) Delete a user\n3) Return to previous menu");
+            int ans = validation.CheckIntString("\nPlease enter your choice:", 1, 3);
+            switch (ans)
+            {
+                case 1:
+                    return 1;
+                    break;
+                case 2:
+                    return 2;
+                    break;
+                default:
+                    return 0;
+                    break;
             }
         }
     }
@@ -252,6 +280,74 @@ namespace ConsoleApp1
             }
         }
     }
+    class Admin
+    {
+        Validation validation = new Validation();
+        public void AddUser()
+        {
+            string result = "";
+            int userID;
+            Console.WriteLine("Please enter the new user's username");
+            string UserName = Console.ReadLine();
+            Console.WriteLine("Please enter the new user's password");
+            string UserPassword = Console.ReadLine();
+            using (SqlConnection conn = new SqlConnection())
+            {
+                try
+                {
+                    conn.ConnectionString = "Server=localhost\\SQLEXPRESS ;Database=SQLDB ; Trusted_Connection=true";
+                    conn.Open();
+                    SqlCommand command1 = new SqlCommand("INSERT INTO Logins (UserID,Username,Password) VALUES(@0,@1,@2)", conn);
+                    SqlCommand command2 = new SqlCommand("SELECT Max(UserID) From Logins", conn);
+                    userID = Int32.Parse(command2.ExecuteScalar().ToString());
+                    userID++;
+                    command1.Parameters.Add(new SqlParameter("0", userID));
+                    command1.Parameters.Add(new SqlParameter("1", UserName));
+                    command1.Parameters.Add(new SqlParameter("2", UserPassword));
+                    Console.WriteLine("New user created, Total rows affected " + command1.ExecuteNonQuery());
+                }
+                catch (SqlException er)
+                {
+                    Console.WriteLine("Error with: " + er.Message);
+                    
+                }
+                               
+            }
+        }
+        public void DeleteUser()
+        {
+            Console.WriteLine("Please enter the ID of the user you wish to remove: ");
+            int ans = validation.ReadInt(Console.ReadLine());
+            using (SqlConnection conn = new SqlConnection())
+            {
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS ;Database=SQLDB ; Trusted_Connection=true";
+                conn.Open();
+                SqlCommand deletecommand = new SqlCommand("DELETE FROM Logins WHERE UserID = @1",conn);
+                SqlCommand readvalue = new SqlCommand("SELECT * FROM Logins WHERE UserID = @1",conn);
+                readvalue.Parameters.Add(new SqlParameter("1", ans));
+                deletecommand.Parameters.Add(new SqlParameter("1", ans));
+                using (SqlDataReader reader = readvalue.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        Console.WriteLine("Are you sure you want to delete" + reader[1].ToString() + " from the system?");
+                    }                   
+                }
+                string reply = validation.readString("Y/N: ");
+                if (reply.ToLower() == "y")
+                {
+                    deletecommand.ExecuteNonQuery();
+                    Console.WriteLine("User Deleted");
+                }
+
+            }
+        }
+    }
+    /*using (SqlConnection conn = new SqlConnection()) code for sql query start
+            {
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS ;Database=SQLDB ; Trusted_Connection=true";
+                conn.Open();
+            }*/
     /*SqlCommand command1 = new SqlCommand("INSERT INTO Logins (UserID,Username,Password) VALUES(@0,@1,@2)", conn);
     command1.Parameters.Add(new SqlParameter("0", UserID));
                 command1.Parameters.Add(new SqlParameter("1", UserName)); code to create new user, will be useful for admin class
