@@ -33,4 +33,20 @@ namespace ConsoleApp1
             Console.ReadLine();
         }
     }
+    class Task
+    {
+        private string TaskName;
+        private string TaskDescription;
+        private int TaskID;
+    }
+    class Project
+    {
+        private List<Task> ListOfTasks;
+        private string Status;
+        private string ProjectName;
+        private int ProjectID;
+        private decimal PercentComplete;
+        private int NumofTasks;
+        private int NumofMembers;
+    }
 }
