@@ -7,12 +7,14 @@ using System.Linq;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
+using System.CodeDom;
 
 namespace ConsoleApp1
 {
     class Program
     {
         static Validation validation = new Validation();
+        static Display display = new Display();
         static Login login = new Login();
         static string usertype;
         static int maxusermenu = 5;
@@ -20,15 +22,53 @@ namespace ConsoleApp1
         static void Main()
         {
             BeginProgram();
-            
-            if (usertype.ToLower() == "user")
+            int ans=0;
+            bool exit = false;
+            while (exit == false)
             {
-                DisplayUserMenu();
-                int ans = validation.CheckIntString("Enter your choice between 1 and " + maxusermenu + ": ", 1, maxusermenu);
-            }
-            else if (usertype.ToLower() == "admin")
-            {
+                if (usertype.ToLower() == "user")
+                {
+                    DisplayUserMenu();
+                    ans = validation.CheckIntString("Enter your choice between 1 and " + maxusermenu + ": ", 1, maxusermenu);
+                }
+                else if (usertype.ToLower() == "admin")
+                {
+                    DisplayAdminMenu();
+                    ans = validation.CheckIntString("Enter your choice between 1 and " + maxusermenu + ": ", 1, maxusermenu);
+                }
+                else
+                {
+                    Console.WriteLine("Error occured. Closing the program");
+                }
+                switch (ans)
+                {
+                    case 1:
+                        break;
+                    case 2:
+                        if (usertype == "user")
+                        {
+                            display.DisplayUsers(); // CHANGE
+                        }
+                        else
+                        {
+                            display.DisplayUsers();
+                        }
+                        break;
+                    case 3:
+                        break; 
+                    case 4:
+                        break;
+                    case 5:
+                        if (usertype == "user")
+                        {
+                            exit = true;
+                        }
+                        else
+                        {
 
+                        }
+                        break;
+                }
             }
             
         }
@@ -45,9 +85,32 @@ namespace ConsoleApp1
         static void DisplayAdminMenu()
         {
             Console.WriteLine("Admin Menu: ");
+            Console.WriteLine("\n1) View all Projects\n2) View all Members\n3) View your notifications\n4) Change your password\n5) Exit");
         }
 
 
+    }
+    class Display
+    {
+        public void DisplayNotification()
+        {
+
+        }
+        public void DisplayUsers() // displays all users to the admin
+        {
+            using (SqlConnection conn = new SqlConnection()) 
+            {
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS ;Database=SQLDB ; Trusted_Connection=true";
+                conn.Open();
+                SqlCommand command1 = new SqlCommand("SELECT UserID, Username FROM Logins", conn);
+                SqlDataReader reader = command1.ExecuteReader();
+                while (reader.Read())
+                {
+                    Console.WriteLine("UserID\tUsername");
+                    Console.WriteLine(String.Format("{0}\t | {1}",reader[0].ToString(), reader[1].ToString()));
+                }
+            }
+        }
     }
 
     class Validation
@@ -104,13 +167,17 @@ namespace ConsoleApp1
             {
                 case 1:
                     UserLogin();
+                    return "user";
                     break;
                 case 2:
                     AdminLogin();
+                    return "admin";
+                    break;
+                default:
+                    return "error";
                     break;
             }
-
-            return "user";
+            
         }
         private void UserLogin()
         {
@@ -119,7 +186,7 @@ namespace ConsoleApp1
             {
                 string username = validation.readString("\nPlease enter your UserName: ");
                 string password = validation.readString("\nPlease enter your Password: ");            
-                user.SetUpUser(username, password, false);
+                valid = user.SetUpUser(username, password, false);
             }
             
         }
@@ -163,7 +230,7 @@ namespace ConsoleApp1
                             {
                                 Console.WriteLine("Login Successful");
                                 Console.WriteLine("UserID\tUsername\tPassword");
-                                Console.WriteLine(String.Format("{0}\t|{1}\t|{2}", reader[0], reader[1], reader[2]));
+                                Console.WriteLine(String.Format("{0}\t | {1}\t | {2}", reader[0], reader[1], reader[2]));
                                 return true;
                             }
                             else
