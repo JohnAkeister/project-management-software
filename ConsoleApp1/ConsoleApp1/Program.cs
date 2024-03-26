@@ -32,6 +32,24 @@ namespace ConsoleApp1
             }
             Console.ReadLine();
         }
+        public void BeginProgram()
+        {
+            Login login = new Login();
+            login.BeginLogin();
+        }
+        
+    }
+    class Validation
+    {
+
+    }
+    class Login
+    {
+        public void BeginLogin()
+        {
+            Console.WriteLine("Would you like to login to an user or admin account: \n1) User\n2) Admin");
+            int choice = Convert.ToInt32(Console.ReadLine());
+        }
     }
     class Task
     {
