@@ -95,7 +95,8 @@ namespace ConsoleApp1
     }
     class Login
     {
-        Validation validation = new Validation();
+        private Validation validation = new Validation();
+        private User user = new User();
         public string BeginLogin()
         {
             int choice = validation.CheckIntString("Would you like to login to an user or admin account: \n1) User\n2) Admin\n", 1, 2);
@@ -113,10 +114,14 @@ namespace ConsoleApp1
         }
         private void UserLogin()
         {
-            string username = validation.readString("\nPlease enter your UserName: ");
-            string password = validation.readString("\nPlease enter your Password: ");
-            User user = new User();
-            user.SetUpUser(username, password, false);
+            bool valid = false;
+            while (!valid)
+            {
+                string username = validation.readString("\nPlease enter your UserName: ");
+                string password = validation.readString("\nPlease enter your Password: ");            
+                user.SetUpUser(username, password, false);
+            }
+            
         }
         private void AdminLogin()
         {
@@ -136,7 +141,7 @@ namespace ConsoleApp1
             this.UserPassword = "";
             this.onProject = false;
         }
-        public void SetUpUser(string name, string password, bool project)
+        public bool SetUpUser(string name, string password, bool project)
         {
             this.UserName = name;
             this.UserPassword = password;
@@ -147,7 +152,7 @@ namespace ConsoleApp1
                 conn.Open();
                 try
                 {
-                    SqlCommand command = new SqlCommand("SELECT * FROM Logins WHERE Username = @0", conn);
+                    SqlCommand command = new SqlCommand("SELECT * FROM Logins WHERE Username = @0", conn); // extracts from DB when the username is valid
                     command.Parameters.Add(new SqlParameter("0", UserName));
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
@@ -159,6 +164,12 @@ namespace ConsoleApp1
                                 Console.WriteLine("Login Successful");
                                 Console.WriteLine("UserID\tUsername\tPassword");
                                 Console.WriteLine(String.Format("{0}\t|{1}\t|{2}", reader[0], reader[1], reader[2]));
+                                return true;
+                            }
+                            else
+                            {
+                                Console.WriteLine("Login Unsuccesful. Please re-enter username and password");
+                                return false;
                             }
                         }
                     }
@@ -168,7 +179,8 @@ namespace ConsoleApp1
 
                     Console.WriteLine("Error in SQL Server, " + er.Message);
                 }
-
+                Console.WriteLine("\nInvalid UserName");
+                return false;
 
             }
         }
