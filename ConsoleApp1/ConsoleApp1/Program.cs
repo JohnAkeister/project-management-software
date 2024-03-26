@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,37 +13,23 @@ namespace ConsoleApp1
         static void Main()
         {
             BeginProgram();
-            string[] tasks;
-            Console.WriteLine("Please enter a Project name");
-            string projectname = Console.ReadLine();
-            Console.WriteLine("How many team members will be assigned?");
-            int numofusers = Convert.ToInt32(Console.ReadLine());
-            Console.WriteLine("How many tasks will be part of this project?");
-            int numoftasks = Convert.ToInt32(Console.ReadLine());
-            tasks = new string[numoftasks];
-            for (int i = 0; i < numoftasks; i++)
-            {
-                
-                Console.WriteLine("Please enter the task name");
-                tasks[i] = Console.ReadLine();
-            }
-            Console.WriteLine("Project: "+ projectname + "\nList of tasks: ");
-            for (int i = 0; i < tasks.Length; i++)
-            {
-                Console.WriteLine((i + 1) +") " + tasks[i]);
-
-            }
-            Console.ReadLine();
             
+
         }
         public static void BeginProgram()
         {
             Login login = new Login();
-            login.BeginLogin();
+            string usertype = login.BeginLogin();
+        }
+        static void DisplayUserMenu()
+        {
+            Console.WriteLine("User Menu: ");
+            Console.WriteLine("\n1) View all Projects\n2) View your Project\n3) View your notifications\n4) Change your password\n5) Exit");
         }
 
-        
+
     }
+
     class Validation
     {
         public string readString(string prompt)//checks for null entry
@@ -89,11 +76,38 @@ namespace ConsoleApp1
     class Login
     {
         Validation validation = new Validation();
-        public void BeginLogin()
+        public string BeginLogin()
         {
             int choice = validation.CheckIntString("Would you like to login to an user or admin account: \n1) User\n2) Admin\n", 1, 2);
+            switch (choice)
+            {
+                case 1:
+                    UserLogin();
+                    break;
+                case 2:               
+                    break;
+            }
+            return "user";
+        }
+        private void UserLogin()
+        {
+            string username = validation.readString("\nPlease enter your UserName: ");
+            string password = validation.readString("\nPlease enter your Password: ");
         }
     }
+    class User
+    {
+        public string UserName;
+        private string UserID;
+        private bool onProject;
+        public User()
+        {
+            this.UserName = "";
+            this.UserID = "";
+            this.onProject = false;
+        }
+    }
+    
     class Task
     {
         private string TaskName;
@@ -109,5 +123,43 @@ namespace ConsoleApp1
         private decimal PercentComplete;
         private int NumofTasks;
         private int NumofMembers;
+
+        public string getName() { return this.ProjectName; }
+        public void setName(string name) { this.ProjectName = name; }
+        public string getStatus() { return this.Status; }
+        public void setStatus(string status) { this.Status = status; }
+        public int getID() { return this.ProjectID; }
+        public void setID(int ID) { this.ProjectID = ID; }
+        public decimal getpercent() { return this.PercentComplete; }
+        public void setPercent(decimal percent) { this.PercentComplete = percent; }
+        public int getnumoftasks() { return this.NumofTasks; }
+        public void setnumoftasks(int tasks) { this.NumofTasks = tasks; }
+        public int getnumofmem() { return this.NumofMembers; }
+        public void setNumOfMembers(int members) { this.NumofMembers = members; }
+        public void Placeholder()
+        {
+            string[] tasks;
+            Console.WriteLine("Please enter a Project name");
+            string projectname = Console.ReadLine();
+            Console.WriteLine("How many team members will be assigned?");
+            int numofusers = Convert.ToInt32(Console.ReadLine());
+            Console.WriteLine("How many tasks will be part of this project?");
+            int numoftasks = Convert.ToInt32(Console.ReadLine());
+            tasks = new string[numoftasks];
+            for (int i = 0; i < numoftasks; i++)
+            {
+
+                Console.WriteLine("Please enter the task name");
+                tasks[i] = Console.ReadLine();
+            }
+            Console.WriteLine("Project: " + projectname + "\nList of tasks: ");
+            for (int i = 0; i < tasks.Length; i++)
+            {
+                Console.WriteLine((i + 1) + ") " + tasks[i]);
+
+            }
+            Console.ReadLine();
+        }
+        
     }
 }
