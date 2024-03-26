@@ -8,8 +8,10 @@ namespace ConsoleApp1
 {
     internal class Program
     {
-        static void Main(string[] args)
+        Validation validation = new Validation();
+        static void Main()
         {
+            BeginProgram();
             string[] tasks;
             Console.WriteLine("Please enter a Project name");
             string projectname = Console.ReadLine();
@@ -31,8 +33,9 @@ namespace ConsoleApp1
 
             }
             Console.ReadLine();
+            
         }
-        public void BeginProgram()
+        public static void BeginProgram()
         {
             Login login = new Login();
             login.BeginLogin();
@@ -88,8 +91,7 @@ namespace ConsoleApp1
         Validation validation = new Validation();
         public void BeginLogin()
         {
-            Console.WriteLine("Would you like to login to an user or admin account: \n1) User\n2) Admin");
-            int choice = validation.CheckIntString(Console.ReadLine(), 1, 2);
+            int choice = validation.CheckIntString("Would you like to login to an user or admin account: \n1) User\n2) Admin\n", 1, 2);
         }
     }
     class Task
