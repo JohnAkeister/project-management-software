@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Data.Sql;
+using System.Data.SqlTypes;
 using System.Linq;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
@@ -27,7 +30,7 @@ namespace ConsoleApp1
             {
 
             }
-
+            
         }
         public static void BeginProgram()
         {      
@@ -101,7 +104,8 @@ namespace ConsoleApp1
                 case 1:
                     UserLogin();
                     break;
-                case 2:               
+                case 2:
+                    AdminLogin();
                     break;
             }
 
@@ -113,6 +117,10 @@ namespace ConsoleApp1
             string password = validation.readString("\nPlease enter your Password: ");
             User user = new User();
             user.SetUpUser(username, password, false);
+        }
+        private void AdminLogin()
+        {
+
         }
     }
     class User
@@ -133,6 +141,17 @@ namespace ConsoleApp1
             this.UserName = name;
             this.UserPassword = password;
             this.onProject= project;
+            using (SqlConnection conn = new SqlConnection())
+            {
+                conn.ConnectionString = "Server=SQLDB ;Database=Database1 ; Trusted_Connection=true";
+                conn.Open();
+                SqlCommand command = new SqlCommand("SELECT * FROM Logins ORDER BY UserID",conn);
+                SqlCommand command1 = new SqlCommand("INSERT INTO Logins (UserID,Username,Password) VALUES(@0,@1,@2)", conn);
+                command1.Parameters.Add(new SqlParameter("0", UserID));
+                command1.Parameters.Add(new SqlParameter("1", UserName));
+                command1.Parameters.Add(new SqlParameter("2", UserPassword));
+                
+            }
         }
     }
     
