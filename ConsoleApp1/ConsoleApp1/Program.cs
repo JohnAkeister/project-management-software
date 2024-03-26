@@ -53,6 +53,11 @@ namespace ConsoleApp1
                     case 2:
                         if (usertype == "user")
                         {
+                            
+                            
+                        }
+                        else if(usertype == "admin")
+                        {                            
                             adminmenu = display.DisplayUsers(); // CHANGE
                             switch (adminmenu)
                             {
@@ -65,11 +70,6 @@ namespace ConsoleApp1
                                 default:
                                     break;
                             }
-                            
-                        }
-                        else
-                        {
-                            adminmenu = display.DisplayUsers();
                         }
                         break;
                     case 3:
@@ -115,13 +115,13 @@ namespace ConsoleApp1
             {
                 conn.ConnectionString = "Server=localhost\\SQLEXPRESS ;Database=SQLDB ; Trusted_Connection=true";
                 conn.Open();
-                SqlCommand command1 = new SqlCommand("SELECT UserID, Username FROM Logins", conn);
+                SqlCommand command1 = new SqlCommand("SELECT UserID, Username, IsAdmin FROM Logins", conn);
                 SqlDataReader reader = command1.ExecuteReader();
-                Console.WriteLine("UserID\tUsername");
+                Console.WriteLine("UserID\tUsername\tIsAdmin?");
                 while (reader.Read())
                 {
                     
-                    Console.WriteLine(String.Format("{0}\t | {1}",reader[0], reader[1]));
+                    Console.WriteLine(String.Format("{0}\t | {1}\t | {2}",reader[0], reader[1], reader[2]));
                 }
             }
             Console.WriteLine("\nMenu: \n1) Add a new user\n2) Delete a user\n3) Return to previous menu");
@@ -198,7 +198,7 @@ namespace ConsoleApp1
                     return "user";
                     break;
                 case 2:
-                    AdminLogin();
+                    UserLogin();
                     return "admin";
                     break;
                 default:
@@ -214,33 +214,36 @@ namespace ConsoleApp1
             {
                 string username = validation.readString("\nPlease enter your UserName: ");
                 string password = validation.readString("\nPlease enter your Password: ");            
-                valid = user.SetUpUser(username, password, false);
+                valid = user.SetUpUser(username, password);
             }
             
         }
         private void AdminLogin()
-        {
-
+        { /* Potentially not necessary
+            bool valid = false;
+            while (!valid)
+            {
+                string username = validation.readString("\nPlease enter your UserName: ");
+                string password = validation.readString("\nPlease enter your Password: ");
+                
+            }*/
         }
     }
     class User
     {
-        private string UserName;
-        private int UserID;
+        private string UserName;    
         private string UserPassword;
         private bool onProject;
         public User()
         {
-            this.UserName = "";
-            this.UserID = 0;
+            this.UserName = "";           
             this.UserPassword = "";
             this.onProject = false;
         }
-        public bool SetUpUser(string name, string password, bool project)
+        public bool SetUpUser(string name, string password)
         {
             this.UserName = name;
-            this.UserPassword = password;
-            this.onProject= project;
+            this.UserPassword = password;           
             using (SqlConnection conn = new SqlConnection())
             {
                 conn.ConnectionString = "Server=localhost\\SQLEXPRESS ;Database=SQLDB ; Trusted_Connection=true";
@@ -257,8 +260,8 @@ namespace ConsoleApp1
                             if (reader[2].ToString() == UserPassword)
                             {
                                 Console.WriteLine("Login Successful");
-                                Console.WriteLine("UserID\tUsername\tPassword");
-                                Console.WriteLine(String.Format("{0}\t | {1}\t | {2}", reader[0], reader[1], reader[2]));
+                                Console.WriteLine("UserID\tUsername\tPassword\tIsAdmin?");
+                                Console.WriteLine(String.Format("{0}\t | {1}\t | {2}\t | {3}", reader[0], reader[1], reader[2], reader[3]));
                                 return true;
                             }
                             else
@@ -291,19 +294,24 @@ namespace ConsoleApp1
             string UserName = Console.ReadLine();
             Console.WriteLine("Please enter the new user's password");
             string UserPassword = Console.ReadLine();
+            Console.WriteLine("Is the User an admin?(y/n)");
+            string IsAdmin = Console.ReadLine();
+            IsAdmin = IsAdmin[0].ToString();
+            IsAdmin = IsAdmin.ToUpper();
             using (SqlConnection conn = new SqlConnection())
             {
                 try
                 {
                     conn.ConnectionString = "Server=localhost\\SQLEXPRESS ;Database=SQLDB ; Trusted_Connection=true";
                     conn.Open();
-                    SqlCommand command1 = new SqlCommand("INSERT INTO Logins (UserID,Username,Password) VALUES(@0,@1,@2)", conn);
+                    SqlCommand command1 = new SqlCommand("INSERT INTO Logins (UserID,Username,Password,IsAdmin) VALUES(@0,@1,@2,@3)", conn);
                     SqlCommand command2 = new SqlCommand("SELECT Max(UserID) From Logins", conn);
                     userID = Int32.Parse(command2.ExecuteScalar().ToString());
                     userID++;
                     command1.Parameters.Add(new SqlParameter("0", userID));
                     command1.Parameters.Add(new SqlParameter("1", UserName));
                     command1.Parameters.Add(new SqlParameter("2", UserPassword));
+                    command1.Parameters.Add(new SqlParameter("3", IsAdmin));
                     Console.WriteLine("New user created, Total rows affected " + command1.ExecuteNonQuery());
                 }
                 catch (SqlException er)
@@ -330,16 +338,19 @@ namespace ConsoleApp1
                 {
                     while (reader.Read())
                     {
-                        Console.WriteLine("Are you sure you want to delete" + reader[1].ToString() + " from the system?");
+                        Console.WriteLine("Are you sure you want to delete " + reader[1].ToString() + " from the system?");
                     }                   
                 }
                 string reply = validation.readString("Y/N: ");
                 if (reply.ToLower() == "y")
                 {
                     deletecommand.ExecuteNonQuery();
-                    Console.WriteLine("User Deleted");
+                    Console.WriteLine("User Deleted, returning to main menu");
                 }
-
+                else
+                {
+                    Console.WriteLine("User has not been deleted, returning to main menu");
+                }
             }
         }
     }
