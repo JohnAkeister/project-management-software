@@ -19,7 +19,7 @@ namespace ConsoleApp1
         static Admin admin = new Admin();
         static string usertype;
         static int maxusermenu = 5;
-        int maxadminmenu = 5;
+        static int maxadminmenu = 5;
         static void Main()
         {
             BeginProgram();                    
@@ -40,7 +40,7 @@ namespace ConsoleApp1
                 else if (usertype.ToLower() == "admin")
                 {
                     DisplayAdminMenu();
-                    ans = validation.CheckIntString("Enter your choice between 1 and " + maxusermenu + ": ", 1, maxusermenu);
+                    ans = validation.CheckIntString("Enter your choice between 1 and " + maxusermenu + ": ", 1, maxadminmenu);
                 }
                 else
                 {
@@ -66,6 +66,9 @@ namespace ConsoleApp1
                                     break;
                                 case 2:
                                     admin.DeleteUser();
+                                    break;
+                                case 3:
+                                    admin.EditUser();
                                     break;
                                 default:
                                     break;
@@ -124,7 +127,7 @@ namespace ConsoleApp1
                     Console.WriteLine(String.Format("{0}\t | {1}\t | {2}",reader[0], reader[1], reader[2]));
                 }
             }
-            Console.WriteLine("\nMenu: \n1) Add a new user\n2) Delete a user\n3) Return to previous menu");
+            Console.WriteLine("\nMenu: \n1) Add a new user\n2) Delete a user\n3) Edit a user\n4) Return to main menu");
             int ans = validation.CheckIntString("\nPlease enter your choice:", 1, 3);
             switch (ans)
             {
@@ -133,6 +136,9 @@ namespace ConsoleApp1
                     break;
                 case 2:
                     return 2;
+                    break;
+                case 3:
+                    return 3;
                     break;
                 default:
                     return 0;
@@ -351,6 +357,67 @@ namespace ConsoleApp1
                 {
                     Console.WriteLine("User has not been deleted, returning to main menu");
                 }
+            }
+        }
+        public void EditUser()
+        {
+            
+                Console.WriteLine("Please enter the ID of the user you wish to edit: ");
+                string reply = Console.ReadLine();
+                Console.WriteLine("Which category would you like to edit: \n1) Username\n2) Password\n3) IsAdmin");
+                int ans = validation.CheckIntString("Please choose between 1 and 3",1,3);
+                switch (ans)
+                {
+                    case 1:
+                    UpdateName(reply);
+                        break;
+                    case 2:
+                    UpdatePassword(reply);
+                        break;
+                    case 3:
+                    UpdateAdmin(reply);
+                        break;
+                }
+
+            
+            
+        }
+        private void UpdateName(string UserID)
+        {
+            string newname = validation.readString("Please enter the new username: ");
+            using (SqlConnection conn = new SqlConnection())
+            {
+                SqlCommand command = new SqlCommand("Update Logins SET Username = @0 WHERE UserID = @1 ");
+                command.Parameters.Add(new SqlParameter("0", newname));
+                command.Parameters.Add(new SqlParameter("1", UserID));
+                conn.Open();
+                command.ExecuteNonQuery();
+                Console.WriteLine("Username updated for UserID: " + UserID);
+            }
+        }
+        private void UpdatePassword(string UserID)
+        {
+            string newpass = validation.readString("Please enter the new password: ");
+            using (SqlConnection conn = new SqlConnection())
+            {
+                SqlCommand command = new SqlCommand("Update Logins SET Password = @0 WHERE UserID = @1 ");
+                command.Parameters.Add(new SqlParameter("0", newpass));
+                command.Parameters.Add(new SqlParameter("1", UserID));
+                conn.Open();
+                command.ExecuteNonQuery();
+                Console.WriteLine("Password updated for UserID: " + UserID);
+            }
+        }
+        private void UpdateAdmin(string UserID)
+        {           
+            using (SqlConnection conn = new SqlConnection())
+            {
+                SqlCommand command = new SqlCommand("Update Logins SET IsAdmin = @0 WHERE UserID = @1 ");
+                command.Parameters.Add(new SqlParameter("0", 'Y'));
+                command.Parameters.Add(new SqlParameter("1", UserID));
+                conn.Open();
+                command.ExecuteNonQuery();
+                Console.WriteLine("Admin status updated for UserID: " + UserID);
             }
         }
     }
