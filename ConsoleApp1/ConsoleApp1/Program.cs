@@ -7,24 +7,41 @@ using System.Threading.Tasks;
 
 namespace ConsoleApp1
 {
-    internal class Program
+    class Program
     {
-        Validation validation = new Validation();
+        static Validation validation = new Validation();
+        static Login login = new Login();
+        static string usertype;
+        static int maxusermenu = 5;
+        int maxadminmenu = 5;
         static void Main()
         {
             BeginProgram();
             
+            if (usertype.ToLower() == "user")
+            {
+                DisplayUserMenu();
+                int ans = validation.CheckIntString("Enter your choice between 1 and " + maxusermenu + ": ", 1, maxusermenu);
+            }
+            else if (usertype.ToLower() == "admin")
+            {
+
+            }
 
         }
         public static void BeginProgram()
-        {
-            Login login = new Login();
-            string usertype = login.BeginLogin();
+        {      
+            usertype = login.BeginLogin();
+
         }
         static void DisplayUserMenu()
         {
             Console.WriteLine("User Menu: ");
             Console.WriteLine("\n1) View all Projects\n2) View your Project\n3) View your notifications\n4) Change your password\n5) Exit");
+        }
+        static void DisplayAdminMenu()
+        {
+            Console.WriteLine("Admin Menu: ");
         }
 
 
@@ -94,18 +111,28 @@ namespace ConsoleApp1
         {
             string username = validation.readString("\nPlease enter your UserName: ");
             string password = validation.readString("\nPlease enter your Password: ");
+            User user = new User();
+            user.SetUpUser(username, password, false);
         }
     }
     class User
     {
-        public string UserName;
-        private string UserID;
+        private string UserName;
+        private int UserID;
+        private string UserPassword;
         private bool onProject;
         public User()
         {
             this.UserName = "";
-            this.UserID = "";
+            this.UserID = 0;
+            this.UserPassword = "";
             this.onProject = false;
+        }
+        public void SetUpUser(string name, string password, bool project)
+        {
+            this.UserName = name;
+            this.UserPassword = password;
+            this.onProject= project;
         }
     }
     
