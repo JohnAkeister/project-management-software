@@ -1,0 +1,7 @@
+G:\Software Engineering\SOFT40141\Coursework\ConsoleApp1\ConsoleApp1\bin\Debug\ConsoleApp1.exe.config
+G:\Software Engineering\SOFT40141\Coursework\ConsoleApp1\ConsoleApp1\bin\Debug\ConsoleApp1.exe
+G:\Software Engineering\SOFT40141\Coursework\ConsoleApp1\ConsoleApp1\bin\Debug\ConsoleApp1.pdb
+G:\Software Engineering\SOFT40141\Coursework\ConsoleApp1\ConsoleApp1\obj\Debug\ConsoleApp1.csproj.AssemblyReference.cache
+G:\Software Engineering\SOFT40141\Coursework\ConsoleApp1\ConsoleApp1\obj\Debug\ConsoleApp1.csproj.CoreCompileInputs.cache
+G:\Software Engineering\SOFT40141\Coursework\ConsoleApp1\ConsoleApp1\obj\Debug\ConsoleApp1.exe
+G:\Software Engineering\SOFT40141\Coursework\ConsoleApp1\ConsoleApp1\obj\Debug\ConsoleApp1.pdb
