@@ -143,7 +143,7 @@ namespace ConsoleApp1
             this.onProject= project;
             using (SqlConnection conn = new SqlConnection())
             {
-                conn.ConnectionString = "Server=SQLEXPRESS ;Database=SQLDB ; Trusted_Connection=true";
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS ;Database=SQLDB ; Trusted_Connection=true";
                 conn.Open();
                 try
                 {
@@ -156,9 +156,9 @@ namespace ConsoleApp1
                         {
                             if (reader[2].ToString() == UserPassword)
                             {
-                                Console.WriteLine("Login Successfull");
+                                Console.WriteLine("Login Successful");
                                 Console.WriteLine("UserID\tUsername\tPassword");
-                                Console.WriteLine(String.Format("{0}\t|{1}\t{2}", reader[0], reader[1], reader[2]));
+                                Console.WriteLine(String.Format("{0}\t|{1}\t|{2}", reader[0], reader[1], reader[2]));
                             }
                         }
                     }
