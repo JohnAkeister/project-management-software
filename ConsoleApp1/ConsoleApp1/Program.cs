@@ -869,7 +869,7 @@ namespace ConsoleApp1
                 }
             
             }
-        }
+        } //create a function to add members that can be called by the project leader
         public void Placeholder()
         {
             string[] tasks;
