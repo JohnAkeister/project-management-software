@@ -469,6 +469,7 @@ namespace ConsoleApp1
         private int NumofTasks;
         private int NumofMembers;
         private string ProjectOwner;
+        private int zero = 0;
 
         public void ViewProjects(string usertype)
         {
@@ -476,7 +477,8 @@ namespace ConsoleApp1
             {
                 conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
                 conn.Open();
-                SqlCommand redprojects = new SqlCommand("SELECT ProjectID,ProjectName,Status,NumberOfTasks FROM Projects",conn);
+                SqlCommand redprojects = new SqlCommand("SELECT ProjectID,ProjectName,Status,NumberOfTasks FROM Projects WHERE ProjectID > @0",conn);
+                redprojects.Parameters.Add(new SqlParameter("0", zero));
                 using (SqlDataReader reader = redprojects.ExecuteReader())
                 {
                     Console.WriteLine("ProjectID\tProject Name\t\tProject Status\t\tNumber of Tasks");
@@ -496,6 +498,7 @@ namespace ConsoleApp1
                         AddProject();
                         break;
                     case 2:
+                        DeleteProject();
                         break;
                     case 3:
                         break;
@@ -542,6 +545,38 @@ namespace ConsoleApp1
             }
             AddTask(maxid);
             
+        }
+        public void DeleteProject()
+        {
+            int deleteID;
+            using (SqlConnection conn = new SqlConnection())
+            {
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
+                conn.Open();
+                SqlCommand getmaxid = new SqlCommand("SELECT Max(ProjectID) FROM Projects", conn);
+                int maxid = Int32.Parse(getmaxid.ExecuteScalar().ToString());
+                deleteID = validation.CheckIntString("Please enter the ID of the project you wish to delete: ",1,maxid);
+                SqlCommand deletetasks = new SqlCommand("DELETE FROM Tasks WHERE ProjectID = @0",conn);
+                deletetasks.Parameters.Add(new SqlParameter("0", deleteID));
+                SqlCommand deleteproject = new SqlCommand("DELETE FROM Projects WHERE ProjectID = @0",conn);
+                deleteproject.Parameters.Add(new SqlParameter("0", deleteID));
+                Console.WriteLine("Are you sure you want to delete project ID: " + deleteID + "?");
+                string reply = validation.readString("Y/N: ");
+                if (reply.ToLower() == "y")
+                {
+                    deletetasks.ExecuteNonQuery();
+                    deleteproject.ExecuteNonQuery();
+                    Console.WriteLine("Project Deleted, returning to main menu");
+                }
+                else
+                {
+                    Console.WriteLine("Project has not been deleted, returning to main menu");
+                }
+            }
+        }
+        public void EditProject()
+        {
+
         }
         private void AddTask(int projectID)
         {
