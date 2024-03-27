@@ -86,7 +86,7 @@ namespace ConsoleApp1
                         }
                         else
                         {
-
+                            exit = true;
                         }
                         break;
                 }
@@ -365,7 +365,7 @@ namespace ConsoleApp1
                 Console.WriteLine("Please enter the ID of the user you wish to edit: ");
                 string reply = Console.ReadLine();
                 Console.WriteLine("Which category would you like to edit: \n1) Username\n2) Password\n3) IsAdmin");
-                int ans = validation.CheckIntString("Please choose between 1 and 3",1,3);
+                int ans = validation.CheckIntString("Please choose between 1 and 4",1,4);
                 switch (ans)
                 {
                     case 1:
@@ -387,7 +387,8 @@ namespace ConsoleApp1
             string newname = validation.readString("Please enter the new username: ");
             using (SqlConnection conn = new SqlConnection())
             {
-                SqlCommand command = new SqlCommand("Update Logins SET Username = @0 WHERE UserID = @1 ");
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS ;Database=SQLDB ; Trusted_Connection=true";
+                SqlCommand command = new SqlCommand("Update Logins SET Username = @0 WHERE UserID = @1 ", conn);
                 command.Parameters.Add(new SqlParameter("0", newname));
                 command.Parameters.Add(new SqlParameter("1", UserID));
                 conn.Open();
@@ -400,7 +401,8 @@ namespace ConsoleApp1
             string newpass = validation.readString("Please enter the new password: ");
             using (SqlConnection conn = new SqlConnection())
             {
-                SqlCommand command = new SqlCommand("Update Logins SET Password = @0 WHERE UserID = @1 ");
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS ;Database=SQLDB ; Trusted_Connection=true";
+                SqlCommand command = new SqlCommand("Update Logins SET Password = @0 WHERE UserID = @1 ",conn);
                 command.Parameters.Add(new SqlParameter("0", newpass));
                 command.Parameters.Add(new SqlParameter("1", UserID));
                 conn.Open();
@@ -412,10 +414,24 @@ namespace ConsoleApp1
         {           
             using (SqlConnection conn = new SqlConnection())
             {
-                SqlCommand command = new SqlCommand("Update Logins SET IsAdmin = @0 WHERE UserID = @1 ");
-                command.Parameters.Add(new SqlParameter("0", 'Y'));
-                command.Parameters.Add(new SqlParameter("1", UserID));
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS ;Database=SQLDB ; Trusted_Connection=true";
                 conn.Open();
+                SqlCommand command = new SqlCommand("Update Logins SET IsAdmin = @0 WHERE UserID = @1 ",conn);
+                SqlCommand adminget = new SqlCommand("SELECT IsAdmin FROM Logins WHERE UserID = @1",conn);
+                adminget.Parameters.Add(new SqlParameter("1", UserID));
+                char readin = char.Parse(adminget.ExecuteScalar().ToString());
+                
+                if (readin == 'N')
+                {
+                    readin = 'Y';
+                }
+                else
+                {
+                    readin = 'N';
+                }
+                command.Parameters.Add(new SqlParameter("0", readin));
+                command.Parameters.Add(new SqlParameter("1", UserID));
+                
                 command.ExecuteNonQuery();
                 Console.WriteLine("Admin status updated for UserID: " + UserID);
             }
