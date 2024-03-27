@@ -98,7 +98,7 @@ namespace ConsoleApp1
         static void DisplayUserMenu()
         {
             Console.WriteLine("User Menu for "+username+": ");
-            Console.WriteLine("\n1) View all Projects\n2) View your Project\n3) View your notifications\n4) Change your password\n5) Exit");
+            Console.WriteLine("\n1) View all Projects\n2) View your Projects\n3) View your notifications\n4) Change your password\n5) Exit");
         }
         static void DisplayAdminMenu()
         {
@@ -294,6 +294,10 @@ namespace ConsoleApp1
 
             }
         }
+        public void ViewUsersProjects()
+        {
+
+        }
     }
     class Admin
     {
@@ -452,12 +456,7 @@ namespace ConsoleApp1
     command1.Parameters.Add(new SqlParameter("0", UserID));
                 command1.Parameters.Add(new SqlParameter("1", UserName)); code to create new user, will be useful for admin class
                 command1.Parameters.Add(new SqlParameter("2", UserPassword));*/
-    class Task
-    {
-        private string TaskName;
-        private string TaskDescription;
-        private int TaskID;
-    }
+    
     class Project
     {
         Validation validation = new Validation();
@@ -477,14 +476,14 @@ namespace ConsoleApp1
             {
                 conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
                 conn.Open();
-                SqlCommand redprojects = new SqlCommand("SELECT ProjectID,ProjectName,Status,NumberOfTasks FROM Projects WHERE ProjectID > @0",conn);
+                SqlCommand redprojects = new SqlCommand("SELECT ProjectID,ProjectName,Status,NumberOfTasks,ProjectOwner FROM Projects WHERE ProjectID > @0",conn);
                 redprojects.Parameters.Add(new SqlParameter("0", zero));
                 using (SqlDataReader reader = redprojects.ExecuteReader())
                 {
-                    Console.WriteLine("ProjectID\tProject Name\t\tProject Status\t\tNumber of Tasks");
+                    Console.WriteLine("ProjectID|Project Name\t|Project Status\t|Number of Tasks|Project Owner");
                     while (reader.Read())
                     {
-                        Console.WriteLine(String.Format("{0} \t | {1} \t | {2} \t | {3}", reader[0], reader[1], reader[2], reader[3]));
+                        Console.WriteLine(String.Format("{0} \t | {1} \t | {2} \t | {3}\t | {4}", reader[0], reader[1], reader[2], reader[3], reader[4]));
                     }
                 }
             }
@@ -501,6 +500,7 @@ namespace ConsoleApp1
                         DeleteProject();
                         break;
                     case 3:
+                        EditProject();
                         break;
                     case 4:
                         break;
@@ -576,6 +576,101 @@ namespace ConsoleApp1
         }
         public void EditProject()
         {
+            int projectID;
+            Console.WriteLine();
+            projectID = validation.CheckIntString("Please enter the ID of the project you wish to edit: ", 1, 5);
+            bool valid = false;
+            while (!valid)
+            {
+                int ans = validation.CheckIntString("Please choose from the following; \n1) Edit Project name\n2) Edit Project Owner\n3) Edit Project Status\n4) View a Project's Tasks\n5) Return to Main Menu",1,5);
+                switch (ans)
+                {
+                    case 1:
+                        EditProjectName(projectID);
+                        break;
+                    case 2:
+                        EditProjectOwner(projectID);
+                        break;
+                    case 3:
+                        EditProjectStatus(projectID);
+                        break;
+                    case 4:
+                        break;
+                    default:
+                        break;
+                }
+            }
+            
+        }
+        private void EditProjectName(int projectID)
+        {
+            using (SqlConnection conn = new SqlConnection())
+            {
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
+                conn.Open();
+                SqlCommand getprojname = new SqlCommand("SELECT ProjectName FROM Projects WHERE ProjectID = @0",conn);
+                getprojname.Parameters.Add(new SqlParameter("0", projectID));
+                Console.WriteLine("Current Project name is: " + getprojname.ExecuteScalar().ToString());
+                string newname = validation.readString("Please enter the new project name: ");
+                SqlCommand updatename = new SqlCommand("UPDATE Projects SET ProjectName = @0 WHERE ProjectID = @1", conn);
+                updatename.Parameters.Add(new SqlParameter("0", newname));
+                updatename.Parameters.Add(new SqlParameter("1",projectID));
+                updatename.ExecuteNonQuery();
+                Console.WriteLine("Project " + projectID + " name updated to " + newname);
+            }
+        }
+        private void EditProjectOwner(int projectID)
+        {
+            List<string> ListofMembers = new List<string>();
+            string newname = "";
+            using (SqlConnection conn = new SqlConnection())
+            {
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
+                conn.Open();
+                SqlCommand getprojowner = new SqlCommand("SELECT ProjectOwner FROM Projects WHERE ProjectID = @0", conn);
+                getprojowner.Parameters.Add(new SqlParameter("0", projectID));
+                Console.WriteLine("Current Project Owner is: " + getprojowner.ExecuteScalar().ToString());               
+                SqlCommand updatename = new SqlCommand("UPDATE Projects SET ProjectOwner = @0 WHERE ProjectID = @1", conn);                
+                SqlCommand readin = new SqlCommand("SELECT Username FROM Logins", conn);
+                using (SqlDataReader reader = readin.ExecuteReader())
+                {
+                    Console.WriteLine("List of Members: ");
+                    while (reader.Read())
+                    {
+                        ListofMembers.Add(reader[0].ToString());
+                        Console.WriteLine(reader[0].ToString());
+
+
+                    }
+                }
+                bool exit = false;
+                while (!exit)
+                {
+                    newname = validation.readString("\nEnter the Name of the user you would like to assign to this task: ");
+                    for (int j = 0; j < ListofMembers.Count; j++)
+                    {
+                        if (newname == ListofMembers[j])
+                        {
+                            exit = true;
+                        }
+                    }
+                    if (!exit)
+                    {
+                        Console.WriteLine("\nError User not found in user list. Please re-enter when prompted");
+                    }
+                }
+                updatename.Parameters.Add(new SqlParameter("0", newname));
+                updatename.Parameters.Add(new SqlParameter("1", projectID));
+                updatename.ExecuteNonQuery();
+                Console.WriteLine("Project " + projectID + " owner updated to " + newname);
+            }
+        }
+        private void EditProjectStatus(int projectID)
+        {
+
+        }
+        private void EditProjectTasks(int projectID)
+        {
 
         }
         private void AddTask(int projectID)
@@ -645,18 +740,6 @@ namespace ConsoleApp1
             
             }
         }
-        public string getName() { return this.ProjectName; }
-        public void setName(string name) { this.ProjectName = name; }
-        public string getStatus() { return this.Status; }
-        public void setStatus(string status) { this.Status = status; }
-        public int getID() { return this.ProjectID; }
-        public void setID(int ID) { this.ProjectID = ID; }
-        public decimal getpercent() { return this.PercentComplete; }
-        public void setPercent(int percent) { this.PercentComplete = percent; }
-        public int getnumoftasks() { return this.NumofTasks; }
-        public void setnumoftasks(int tasks) { this.NumofTasks = tasks; }
-        public int getnumofmem() { return this.NumofMembers; }
-        public void setNumOfMembers(int members) { this.NumofMembers = members; }
         public void Placeholder()
         {
             string[] tasks;
