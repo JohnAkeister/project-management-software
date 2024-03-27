@@ -489,8 +489,8 @@ namespace ConsoleApp1
             }
             if (usertype == "admin")
             {
-                Console.WriteLine("Please choose an option: \n1) Add new Project\n2) Delete a Project\n3) Edit a Project\n4) View a Projects Timeline\n5) Exit");
-                int ans = validation.CheckIntString("Please Enter your choice: ", 1, 5);
+                Console.WriteLine("Please choose an option: \n1) Add new Project\n2) Delete a Project\n3) Edit a Project\n4) View a Projects Timeline\n5) View members working on a project\n6) Exit");
+                int ans = validation.CheckIntString("Please Enter your choice: ", 1, 6);
                 switch (ans)
                 {
                     case 1:
@@ -503,6 +503,8 @@ namespace ConsoleApp1
                         EditProject();
                         break;
                     case 4:
+                        break;
+                    case 5:
                         break;
                     default:
                         break;
@@ -602,7 +604,7 @@ namespace ConsoleApp1
                 }
             }
             
-        }
+        } // view project tasks needs to be done
         private void EditProjectName(int projectID)
         {
             using (SqlConnection conn = new SqlConnection())
@@ -669,6 +671,7 @@ namespace ConsoleApp1
         private void EditProjectStatus(int projectID)
         {
             string currentstatus = "";
+            string newstatus = "Not Started";
             using (SqlConnection conn = new SqlConnection())
             {
                 conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
@@ -677,6 +680,56 @@ namespace ConsoleApp1
                 getprojstatus.Parameters.Add(new SqlParameter("0", projectID));
                 currentstatus = getprojstatus.ExecuteScalar().ToString();
                 Console.WriteLine("Current status is: " + currentstatus);
+                if (currentstatus == "Not Started")
+                {
+                    Console.WriteLine("Available statuses are: \n1) In-Progress\n2) Complete");
+                    int ans = validation.CheckIntString("Enter (1-2): ", 1, 2);
+                    switch (ans)
+                    {
+                        case 1:
+                            newstatus = "In-Progress";
+                            break;
+                        case 2:
+                            newstatus = "Complete";
+                            break;
+
+                    }
+                }
+                else if (currentstatus == "In-Progress")
+                {
+                    Console.WriteLine("Available statuses are: \n1) Not Started\n2) Complete");
+                    int ans = validation.CheckIntString("Enter (1-2): ", 1, 2);
+                    switch (ans)
+                    {
+                        case 1:
+                            newstatus = "Not Started";
+                            break;
+                        case 2:
+                            newstatus = "Complete";
+                            break;
+
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Available statuses are: \n1) Not Started\n2) In-Progress");
+                    int ans = validation.CheckIntString("Enter (1-2): ", 1, 2);
+                    switch (ans)
+                    {
+                        case 1:
+                            newstatus = "Not Started";
+                            break;
+                        case 2:
+                            newstatus = "In-Progress";
+                            break;
+
+                    }
+                }
+                SqlCommand updatestatus = new SqlCommand("UPDATE Projects SET Status = @0 WHERE ProjectID = @1", conn);
+                updatestatus.Parameters.Add(new SqlParameter("0", newstatus));
+                updatestatus.Parameters.Add(new SqlParameter("1", projectID));
+                updatestatus.ExecuteNonQuery();
+                Console.WriteLine("Project " + projectID + " ID status has been changed from " + currentstatus + " to " + newstatus);
             }
         }
         private void EditProjectTasks(int projectID)
