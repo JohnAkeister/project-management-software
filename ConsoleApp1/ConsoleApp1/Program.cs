@@ -17,6 +17,7 @@ namespace ConsoleApp1
         static Display display = new Display();
         static Login login = new Login();
         static Admin admin = new Admin();
+        static Project project = new Project();
         static string usertype;
         static string username;
         static int maxusermenu = 5;
@@ -50,6 +51,7 @@ namespace ConsoleApp1
                 switch (ans)
                 {
                     case 1:
+                        project.ViewProjects();
                         break;
                     case 2:
                         if (usertype == "user")
@@ -443,7 +445,7 @@ namespace ConsoleApp1
     }
     /*using (SqlConnection conn = new SqlConnection()) code for sql query start
             {
-                conn.ConnectionString = "Server=localhost\\SQLEXPRESS ;Database=SQLDB ; Trusted_Connection=true";
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
                 conn.Open();
             }*/
     /*SqlCommand command1 = new SqlCommand("INSERT INTO Logins (UserID,Username,Password) VALUES(@0,@1,@2)", conn);
@@ -458,14 +460,41 @@ namespace ConsoleApp1
     }
     class Project
     {
+        Validation validation = new Validation();
         private List<Task> ListOfTasks;
         private string Status;
         private string ProjectName;
         private int ProjectID;
-        private decimal PercentComplete;
+        private int PercentComplete;
         private int NumofTasks;
         private int NumofMembers;
+        private string ProjectOwner;
 
+        public void ViewProjects()
+        {
+            using (SqlConnection conn = new SqlConnection())
+            {
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
+                conn.Open();
+                SqlCommand redprojects = new SqlCommand("SELECT ProjectID,ProjectName,Status FROM Projects",conn);
+                using (SqlDataReader reader = redprojects.ExecuteReader())
+                {
+                    Console.WriteLine("ProjectID\tProject Name\t\tProject Status");
+                    while (reader.Read())
+                    {
+                        Console.WriteLine(String.Format("{0} \t | {1} \t | {2}", reader[0], reader[1], reader[2]));
+                    }
+                }
+            }
+        }
+        public void AddProject()
+        {            
+            ProjectName = validation.readString("What would you like the Project to be called?: ");
+            NumofTasks = validation.CheckIntString("How many tasks will this project have?(Max 50): ",1,50);
+            NumofMembers = validation.CheckIntString("How many team members will be assigned to this project?(Max 10): ", 1, 10);
+            ProjectOwner = validation.readString("What is the name of the Project Owner?: ");
+            
+        }
         public string getName() { return this.ProjectName; }
         public void setName(string name) { this.ProjectName = name; }
         public string getStatus() { return this.Status; }
@@ -473,7 +502,7 @@ namespace ConsoleApp1
         public int getID() { return this.ProjectID; }
         public void setID(int ID) { this.ProjectID = ID; }
         public decimal getpercent() { return this.PercentComplete; }
-        public void setPercent(decimal percent) { this.PercentComplete = percent; }
+        public void setPercent(int percent) { this.PercentComplete = percent; }
         public int getnumoftasks() { return this.NumofTasks; }
         public void setnumoftasks(int tasks) { this.NumofTasks = tasks; }
         public int getnumofmem() { return this.NumofMembers; }
