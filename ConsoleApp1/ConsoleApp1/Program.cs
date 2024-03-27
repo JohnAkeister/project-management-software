@@ -476,9 +476,9 @@ namespace ConsoleApp1
             {
                 conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
                 conn.Open();
-                SqlCommand redprojects = new SqlCommand("SELECT ProjectID,ProjectName,Status,NumberOfTasks,ProjectOwner FROM Projects WHERE ProjectID > @0",conn);
-                redprojects.Parameters.Add(new SqlParameter("0", zero));
-                using (SqlDataReader reader = redprojects.ExecuteReader())
+                SqlCommand readprojects = new SqlCommand("SELECT ProjectID,ProjectName,Status,NumberOfTasks,ProjectOwner FROM Projects WHERE ProjectID > @0",conn);
+                readprojects.Parameters.Add(new SqlParameter("0", zero));
+                using (SqlDataReader reader = readprojects.ExecuteReader())
                 {
                     Console.WriteLine("ProjectID|Project Name\t|Project Status\t|Number of Tasks|Project Owner");
                     while (reader.Read())
@@ -505,6 +505,7 @@ namespace ConsoleApp1
                     case 4:
                         break;
                     case 5:
+                        ViewProjectMembers();
                         break;
                     default:
                         break;
@@ -605,6 +606,33 @@ namespace ConsoleApp1
             }
             
         } // view project tasks needs to be done
+        public void ViewProjectMembers()
+        {
+            List<string> ListOfMembers = new List<string>();
+            List<string> ListNoDupes = new List<string>();
+            Console.WriteLine();
+            int projectID = validation.CheckIntString("Please enter the ID of the project you wish to view the members of: ", 1, 5);
+            using (SqlConnection conn = new SqlConnection())
+            {
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
+                conn.Open();
+                SqlCommand getmembers = new SqlCommand("SELECT AssignedMember FROM Tasks WHERE ProjectID = @0", conn);
+                getmembers.Parameters.Add(new SqlParameter("0",projectID));
+                using (SqlDataReader reader = getmembers.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        ListOfMembers.Add(reader[0].ToString());
+                    }
+                    ListNoDupes = ListOfMembers.Distinct().ToList();
+                    Console.WriteLine("List of current members assigned to Project ID: " + projectID);
+                    for (int i = 0; i < ListOfMembers.Count; i++)
+                    {
+                        Console.WriteLine(ListNoDupes[i]);
+                    }
+                }
+            }
+        }
         private void EditProjectName(int projectID)
         {
             using (SqlConnection conn = new SqlConnection())
@@ -748,7 +776,7 @@ namespace ConsoleApp1
                 {
 
 
-                    taskname = validation.readString("What is the name of taks number " + i + "?: ");
+                    taskname = validation.readString("What is the name of taks number " + (i+1) + "?: ");
                     taskdesc = validation.readString("Please enter the description of the task: ");
                     using (SqlConnection conn = new SqlConnection())
                     {
