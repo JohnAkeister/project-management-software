@@ -18,6 +18,7 @@ namespace ConsoleApp1
         static Login login = new Login();
         static Admin admin = new Admin();
         static string usertype;
+        static string username;
         static int maxusermenu = 5;
         static int maxadminmenu = 5;
         static void Main()
@@ -26,7 +27,7 @@ namespace ConsoleApp1
         }
         public static void BeginProgram()
         {      
-            usertype = login.BeginLogin();
+            usertype = login.BeginLogin(ref username);
             int ans = 0;
             bool exit = false;
             int adminmenu = 0;
@@ -94,12 +95,12 @@ namespace ConsoleApp1
         }
         static void DisplayUserMenu()
         {
-            Console.WriteLine("User Menu: ");
+            Console.WriteLine("User Menu for "+username+": ");
             Console.WriteLine("\n1) View all Projects\n2) View your Project\n3) View your notifications\n4) Change your password\n5) Exit");
         }
         static void DisplayAdminMenu()
         {
-            Console.WriteLine("Admin Menu: ");
+            Console.WriteLine("Admin Menu for " + username + ": ");
             Console.WriteLine("\n1) View all Projects\n2) View all Members\n3) View your notifications\n4) Change your password\n5) Exit");
         }
 
@@ -194,17 +195,17 @@ namespace ConsoleApp1
     {
         private Validation validation = new Validation();
         private User user = new User();
-        public string BeginLogin()
+        public string BeginLogin(ref string username)
         {
             int choice = validation.CheckIntString("Would you like to login to an user or admin account: \n1) User\n2) Admin\n", 1, 2);
             switch (choice)
             {
                 case 1:
-                    UserLogin();
+                    UserLogin(ref username);
                     return "user";
                     break;
                 case 2:
-                    UserLogin();
+                    UserLogin(ref username);
                     return "admin";
                     break;
                 default:
@@ -213,14 +214,15 @@ namespace ConsoleApp1
             }
             
         }
-        private void UserLogin()
+        private void UserLogin(ref string username)
         {
             bool valid = false;
+            
             while (!valid)
             {
-                string username = validation.readString("\nPlease enter your UserName: ");
+                username = validation.readString("\nPlease enter your UserName: ");
                 string password = validation.readString("\nPlease enter your Password: ");            
-                valid = user.SetUpUser(username, password);
+                valid = user.SetUpUser(ref username, password);
             }
             
         }
@@ -246,7 +248,7 @@ namespace ConsoleApp1
             this.UserPassword = "";
             this.onProject = false;
         }
-        public bool SetUpUser(string name, string password)
+        public bool SetUpUser(ref string name, string password)
         {
             this.UserName = name;
             this.UserPassword = password;           
@@ -269,6 +271,7 @@ namespace ConsoleApp1
                                 Console.WriteLine("Login Successful");
                                 Console.WriteLine("UserID\tUsername\tPassword\tIsAdmin?");
                                 Console.WriteLine(String.Format("{0}\t | {1}\t | {2}\t | {3}", reader[0], reader[1], reader[2], reader[3]));
+                                name = this.UserName;
                                 return true;
                             }
                             else
