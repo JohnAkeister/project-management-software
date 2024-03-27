@@ -116,7 +116,7 @@ namespace ConsoleApp1
         {
             using (SqlConnection conn = new SqlConnection()) 
             {
-                conn.ConnectionString = "Server=localhost\\SQLEXPRESS ;Database=SQLDB ; Trusted_Connection=true";
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
                 conn.Open();
                 SqlCommand command1 = new SqlCommand("SELECT UserID, Username, IsAdmin FROM Logins", conn);
                 SqlDataReader reader = command1.ExecuteReader();
@@ -128,7 +128,7 @@ namespace ConsoleApp1
                 }
             }
             Console.WriteLine("\nMenu: \n1) Add a new user\n2) Delete a user\n3) Edit a user\n4) Return to main menu");
-            int ans = validation.CheckIntString("\nPlease enter your choice:", 1, 3);
+            int ans = validation.CheckIntString("\nPlease enter your choice:", 1, 4);
             switch (ans)
             {
                 case 1:
@@ -252,7 +252,8 @@ namespace ConsoleApp1
             this.UserPassword = password;           
             using (SqlConnection conn = new SqlConnection())
             {
-                conn.ConnectionString = "Server=localhost\\SQLEXPRESS ;Database=SQLDB ; Trusted_Connection=true";
+              
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
                 conn.Open();
                 try
                 {
@@ -308,7 +309,7 @@ namespace ConsoleApp1
             {
                 try
                 {
-                    conn.ConnectionString = "Server=localhost\\SQLEXPRESS ;Database=SQLDB ; Trusted_Connection=true";
+                    conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
                     conn.Open();
                     SqlCommand command1 = new SqlCommand("INSERT INTO Logins (UserID,Username,Password,IsAdmin) VALUES(@0,@1,@2,@3)", conn);
                     SqlCommand command2 = new SqlCommand("SELECT Max(UserID) From Logins", conn);
@@ -334,7 +335,7 @@ namespace ConsoleApp1
             int ans = validation.ReadInt(Console.ReadLine());
             using (SqlConnection conn = new SqlConnection())
             {
-                conn.ConnectionString = "Server=localhost\\SQLEXPRESS ;Database=SQLDB ; Trusted_Connection=true";
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
                 conn.Open();
                 SqlCommand deletecommand = new SqlCommand("DELETE FROM Logins WHERE UserID = @1",conn);
                 SqlCommand readvalue = new SqlCommand("SELECT * FROM Logins WHERE UserID = @1",conn);
@@ -387,7 +388,7 @@ namespace ConsoleApp1
             string newname = validation.readString("Please enter the new username: ");
             using (SqlConnection conn = new SqlConnection())
             {
-                conn.ConnectionString = "Server=localhost\\SQLEXPRESS ;Database=SQLDB ; Trusted_Connection=true";
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
                 SqlCommand command = new SqlCommand("Update Logins SET Username = @0 WHERE UserID = @1 ", conn);
                 command.Parameters.Add(new SqlParameter("0", newname));
                 command.Parameters.Add(new SqlParameter("1", UserID));
@@ -401,7 +402,7 @@ namespace ConsoleApp1
             string newpass = validation.readString("Please enter the new password: ");
             using (SqlConnection conn = new SqlConnection())
             {
-                conn.ConnectionString = "Server=localhost\\SQLEXPRESS ;Database=SQLDB ; Trusted_Connection=true";
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
                 SqlCommand command = new SqlCommand("Update Logins SET Password = @0 WHERE UserID = @1 ",conn);
                 command.Parameters.Add(new SqlParameter("0", newpass));
                 command.Parameters.Add(new SqlParameter("1", UserID));
@@ -414,7 +415,7 @@ namespace ConsoleApp1
         {           
             using (SqlConnection conn = new SqlConnection())
             {
-                conn.ConnectionString = "Server=localhost\\SQLEXPRESS ;Database=SQLDB ; Trusted_Connection=true";
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
                 conn.Open();
                 SqlCommand command = new SqlCommand("Update Logins SET IsAdmin = @0 WHERE UserID = @1 ",conn);
                 SqlCommand adminget = new SqlCommand("SELECT IsAdmin FROM Logins WHERE UserID = @1",conn);
