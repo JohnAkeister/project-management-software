@@ -298,6 +298,7 @@ namespace ConsoleApp1
         {
             List<int> projectids = new List<int>();
             List<int> projectidsnodupes = new List<int>();
+            int projectID = 0;
             using (SqlConnection conn = new SqlConnection())
             {
                 conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
@@ -313,14 +314,28 @@ namespace ConsoleApp1
                     projectidsnodupes = projectids.Distinct().ToList();
 
                 }
+                
+                SqlCommand getprojectinfo = new SqlCommand("SELECT * FROM Projects WHERE ProjectID = @0",conn);
                 int[] projectidarry = new int[projectidsnodupes.Count];
+                projectidsnodupes.Sort();
+                Console.WriteLine("ProjectID|ProjectName|Project Status|Number of Tasks|Number of Members|Percentage Complete|Project Owner");
+                
                 for (int i = 0; i < projectidsnodupes.Count; i++)
                 {
-                    projectidarry[i] = projectidsnodupes[i];
+                    projectID = projectidsnodupes[i];
+                    getprojectinfo.Parameters.Add(new SqlParameter("0", projectID));
+                    using (SqlDataReader reader = getprojectinfo.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            Console.WriteLine(String.Format("{0} \t | {1} \t | {2} \t | {3} \t | {4} \t | {5} \t | {6}", reader[0], reader[1], reader[2], reader[3], reader[4], reader[5], reader[6]));
+                        }
+                    }
+                    getprojectinfo.Parameters.Clear();
                 }
                 
-                SqlCommand getprojectinfo = new SqlCommand("SELECT * FROM Projects WHERE ProjectID = @0");
-                getprojectinfo.Parameters.Add(new SqlParameter("0", projectidsnodupes));               
+                
+                              
             }
         }
     }
