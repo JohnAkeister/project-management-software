@@ -51,7 +51,7 @@ namespace ConsoleApp1
                 switch (ans)
                 {
                     case 1:
-                        project.ViewProjects();
+                        project.ViewProjects(usertype);
                         break;
                     case 2:
                         if (usertype == "user")
@@ -470,7 +470,7 @@ namespace ConsoleApp1
         private int NumofMembers;
         private string ProjectOwner;
 
-        public void ViewProjects()
+        public void ViewProjects(string usertype)
         {
             using (SqlConnection conn = new SqlConnection())
             {
@@ -486,22 +486,26 @@ namespace ConsoleApp1
                     }
                 }
             }
-            Console.WriteLine("Please choose an option: \n1) Add new Project\n2) Delete a Project\n3) Edit a Project\n4) View a Projects Timeline\n5) Exit");
-            int ans = validation.CheckIntString("Please Enter your choice: ",1,5);
-            switch (ans)
+            if (usertype == "admin")
             {
-                case 1:
-                    AddProject();
-                    break;
-                case 2:
-                    break;
-                case 3:
-                    break;
-                case 4:
-                    break;
-                default:
-                    break;
+                Console.WriteLine("Please choose an option: \n1) Add new Project\n2) Delete a Project\n3) Edit a Project\n4) View a Projects Timeline\n5) Exit");
+                int ans = validation.CheckIntString("Please Enter your choice: ", 1, 5);
+                switch (ans)
+                {
+                    case 1:
+                        AddProject();
+                        break;
+                    case 2:
+                        break;
+                    case 3:
+                        break;
+                    case 4:
+                        break;
+                    default:
+                        break;
+                }
             }
+            
         }
         public void AddProject()
         {            
@@ -510,6 +514,7 @@ namespace ConsoleApp1
             NumofMembers = validation.CheckIntString("How many team members will be assigned to this project?(Max 10): ", 1, 10);
             ProjectOwner = validation.readString("What is the name of the Project Owner?: ");
             PercentComplete = 0;
+            int maxid = 0;
             using (SqlConnection conn = new SqlConnection())
             {
                 try
@@ -518,7 +523,7 @@ namespace ConsoleApp1
                     conn.Open();
                     SqlCommand addproject = new SqlCommand("INSERT INTO Projects (ProjectID,ProjectName,Status,NumberOfTasks,NumberOfMembers,PercentComplete,ProjectOwner) VALUES (@0,@1,@2,@3,@4,@5,@6)", conn);
                     SqlCommand readvalue = new SqlCommand("SELECT Max(ProjectID) FROM Projects",conn);
-                    int maxid = Int32.Parse(readvalue.ExecuteScalar().ToString());
+                    maxid = Int32.Parse(readvalue.ExecuteScalar().ToString());
                     maxid++;
                     addproject.Parameters.Add(new SqlParameter("0", maxid));
                     addproject.Parameters.Add(new SqlParameter("1", ProjectName));
@@ -535,7 +540,75 @@ namespace ConsoleApp1
                     Console.WriteLine("Error occured. Sql error " + er.Message);
                 }
             }
+            AddTask(maxid);
             
+        }
+        private void AddTask(int projectID)
+        {
+            List<string> ListofMembers = new List<string>();
+            string taskname;
+            string taskdesc;
+            string assignedmember = "";     
+            for (int i = 0; i < NumofTasks; i++)
+            {
+                try
+                {
+
+
+                    taskname = validation.readString("What is the name of taks number " + i + "?: ");
+                    taskdesc = validation.readString("Please enter the description of the task: ");
+                    using (SqlConnection conn = new SqlConnection())
+                    {
+                        conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
+                        conn.Open();
+                        SqlCommand readin = new SqlCommand("SELECT Username FROM Logins", conn);
+                        using (SqlDataReader reader = readin.ExecuteReader())
+                        {
+                            Console.WriteLine("List of Members: ");
+                            while (reader.Read())
+                            {
+                                ListofMembers.Add(reader[0].ToString());
+                                Console.WriteLine(reader[0].ToString());
+                                
+                            
+                            }
+                        }
+                        bool exit = false;
+                        while (!exit)
+                        {
+                            assignedmember = validation.readString("\nEnter the Name of the user you would like to assign to this task: ");
+                            for (int j = 0; j < ListofMembers.Count; j++)
+                            {
+                                if (assignedmember == ListofMembers[j])
+                                {
+                                    exit = true;
+                                }
+                            }
+                            if (!exit)
+                            {
+                                Console.WriteLine("\nError User not found in user list. Please re-enter when prompted");
+                            }
+                        }
+                        SqlCommand addtask = new SqlCommand("INSERT INTO Tasks (TaskID,TaskName,ProjectID,AssignedMember,Description) VALUES (@0,@1,@2,@3,@4)", conn);
+                        SqlCommand readtasknum = new SqlCommand("SELECT Max(TaskID) FROM Tasks", conn);
+                        int taskid = Int32.Parse(readtasknum.ExecuteScalar().ToString());
+                        taskid++;
+                        addtask.Parameters.Add(new SqlParameter("0", taskid));
+                        addtask.Parameters.Add(new SqlParameter("1", taskname));
+                        addtask.Parameters.Add(new SqlParameter("2", projectID));
+                        addtask.Parameters.Add(new SqlParameter("3", assignedmember));
+                        addtask.Parameters.Add(new SqlParameter("4", taskdesc));
+                        addtask.ExecuteNonQuery();
+                        Console.WriteLine("Task '" + taskname + "' added to projectID " + projectID);
+                    }
+                }
+                catch (SqlException er)
+                {
+
+                    Console.WriteLine("Error occured with : " + er.Message);
+                }
+            
+            }
         }
         public string getName() { return this.ProjectName; }
         public void setName(string name) { this.ProjectName = name; }
