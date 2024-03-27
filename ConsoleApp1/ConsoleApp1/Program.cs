@@ -476,15 +476,31 @@ namespace ConsoleApp1
             {
                 conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
                 conn.Open();
-                SqlCommand redprojects = new SqlCommand("SELECT ProjectID,ProjectName,Status FROM Projects",conn);
+                SqlCommand redprojects = new SqlCommand("SELECT ProjectID,ProjectName,Status,NumberOfTasks FROM Projects",conn);
                 using (SqlDataReader reader = redprojects.ExecuteReader())
                 {
-                    Console.WriteLine("ProjectID\tProject Name\t\tProject Status");
+                    Console.WriteLine("ProjectID\tProject Name\t\tProject Status\t\tNumber of Tasks");
                     while (reader.Read())
                     {
-                        Console.WriteLine(String.Format("{0} \t | {1} \t | {2}", reader[0], reader[1], reader[2]));
+                        Console.WriteLine(String.Format("{0} \t | {1} \t | {2} \t | {3}", reader[0], reader[1], reader[2], reader[3]));
                     }
                 }
+            }
+            Console.WriteLine("Please choose an option: \n1) Add new Project\n2) Delete a Project\n3) Edit a Project\n4) View a Projects Timeline\n5) Exit");
+            int ans = validation.CheckIntString("Please Enter your choice: ",1,5);
+            switch (ans)
+            {
+                case 1:
+                    AddProject();
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    break;
+                case 4:
+                    break;
+                default:
+                    break;
             }
         }
         public void AddProject()
@@ -493,6 +509,32 @@ namespace ConsoleApp1
             NumofTasks = validation.CheckIntString("How many tasks will this project have?(Max 50): ",1,50);
             NumofMembers = validation.CheckIntString("How many team members will be assigned to this project?(Max 10): ", 1, 10);
             ProjectOwner = validation.readString("What is the name of the Project Owner?: ");
+            PercentComplete = 0;
+            using (SqlConnection conn = new SqlConnection())
+            {
+                try
+                {
+                    conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
+                    conn.Open();
+                    SqlCommand addproject = new SqlCommand("INSERT INTO Projects (ProjectID,ProjectName,Status,NumberOfTasks,NumberOfMembers,PercentComplete,ProjectOwner) VALUES (@0,@1,@2,@3,@4,@5,@6)", conn);
+                    SqlCommand readvalue = new SqlCommand("SELECT Max(ProjectID) FROM Projects",conn);
+                    int maxid = Int32.Parse(readvalue.ExecuteScalar().ToString());
+                    maxid++;
+                    addproject.Parameters.Add(new SqlParameter("0", maxid));
+                    addproject.Parameters.Add(new SqlParameter("1", ProjectName));
+                    addproject.Parameters.Add(new SqlParameter("2", "Not Started"));
+                    addproject.Parameters.Add(new SqlParameter("3", NumofTasks));
+                    addproject.Parameters.Add(new SqlParameter("4", NumofMembers));
+                    addproject.Parameters.Add(new SqlParameter("5", PercentComplete));
+                    addproject.Parameters.Add(new SqlParameter("6", ProjectOwner));
+                    Console.WriteLine("Project " + ProjectName + " has been created. Total rows affected: " + addproject.ExecuteNonQuery());
+                }
+                catch (SqlException er)
+                {
+
+                    Console.WriteLine("Error occured. Sql error " + er.Message);
+                }
+            }
             
         }
         public string getName() { return this.ProjectName; }
