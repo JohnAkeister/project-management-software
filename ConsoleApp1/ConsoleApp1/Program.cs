@@ -597,6 +597,7 @@ namespace ConsoleApp1
                     case 4:
                         break;
                     default:
+                        valid = true;
                         break;
                 }
             }
@@ -667,7 +668,16 @@ namespace ConsoleApp1
         }
         private void EditProjectStatus(int projectID)
         {
-
+            string currentstatus = "";
+            using (SqlConnection conn = new SqlConnection())
+            {
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
+                conn.Open();
+                SqlCommand getprojstatus = new SqlCommand("SELECT Status FROM Projects Where ProjectID = @0", conn);
+                getprojstatus.Parameters.Add(new SqlParameter("0", projectID));
+                currentstatus = getprojstatus.ExecuteScalar().ToString();
+                Console.WriteLine("Current status is: " + currentstatus);
+            }
         }
         private void EditProjectTasks(int projectID)
         {
