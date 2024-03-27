@@ -18,6 +18,7 @@ namespace ConsoleApp1
         static Login login = new Login();
         static Admin admin = new Admin();
         static Project project = new Project();
+        static User user = new User();
         static string usertype;
         static string username;
         static int maxusermenu = 5;
@@ -56,8 +57,7 @@ namespace ConsoleApp1
                     case 2:
                         if (usertype == "user")
                         {
-                            
-                            
+                            user.ViewUsersProjects(username);
                         }
                         else if(usertype == "admin")
                         {                            
@@ -294,9 +294,34 @@ namespace ConsoleApp1
 
             }
         }
-        public void ViewUsersProjects()
+        public void ViewUsersProjects(string username)
         {
+            List<int> projectids = new List<int>();
+            List<int> projectidsnodupes = new List<int>();
+            using (SqlConnection conn = new SqlConnection())
+            {
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
+                conn.Open();
+                SqlCommand getuserprojects = new SqlCommand("SELECT ProjectID FROM Tasks WHERE AssignedMember = @0 ",conn);
+                getuserprojects.Parameters.Add(new SqlParameter("0", username));
+                using (SqlDataReader reader = getuserprojects.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        projectids.Add(Convert.ToInt32(reader[0].ToString()));
+                    }
+                    projectidsnodupes = projectids.Distinct().ToList();
 
+                }
+                int[] projectidarry = new int[projectidsnodupes.Count];
+                for (int i = 0; i < projectidsnodupes.Count; i++)
+                {
+                    projectidarry[i] = projectidsnodupes[i];
+                }
+                
+                SqlCommand getprojectinfo = new SqlCommand("SELECT * FROM Projects WHERE ProjectID = @0");
+                getprojectinfo.Parameters.Add(new SqlParameter("0", projectidsnodupes));               
+            }
         }
     }
     class Admin
@@ -455,8 +480,7 @@ namespace ConsoleApp1
     /*SqlCommand command1 = new SqlCommand("INSERT INTO Logins (UserID,Username,Password) VALUES(@0,@1,@2)", conn);
     command1.Parameters.Add(new SqlParameter("0", UserID));
                 command1.Parameters.Add(new SqlParameter("1", UserName)); code to create new user, will be useful for admin class
-                command1.Parameters.Add(new SqlParameter("2", UserPassword));*/
-    
+                command1.Parameters.Add(new SqlParameter("2", UserPassword));*/ 
     class Project
     {
         Validation validation = new Validation();
@@ -476,14 +500,14 @@ namespace ConsoleApp1
             {
                 conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
                 conn.Open();
-                SqlCommand readprojects = new SqlCommand("SELECT ProjectID,ProjectName,Status,NumberOfTasks,ProjectOwner FROM Projects WHERE ProjectID > @0",conn);
+                SqlCommand readprojects = new SqlCommand("SELECT ProjectID,ProjectName,Status,NumberOfTasks,ProjectOwner, PercentComplete FROM Projects WHERE ProjectID > @0",conn);
                 readprojects.Parameters.Add(new SqlParameter("0", zero));
                 using (SqlDataReader reader = readprojects.ExecuteReader())
                 {
-                    Console.WriteLine("ProjectID|Project Name\t|Project Status\t|Number of Tasks|Project Owner");
+                    Console.WriteLine("ProjectID|Project Name\t|Project Status\t|Number of Tasks|Project Owner| Percent Complete");
                     while (reader.Read())
                     {
-                        Console.WriteLine(String.Format("{0} \t | {1} \t | {2} \t | {3}\t | {4}", reader[0], reader[1], reader[2], reader[3], reader[4]));
+                        Console.WriteLine(String.Format("{0} \t | {1} \t | {2} \t | {3}\t | {4}\t | {5}", reader[0], reader[1], reader[2], reader[3], reader[4], reader[5]));
                     }
                 }
             }
@@ -626,7 +650,7 @@ namespace ConsoleApp1
                     }
                     ListNoDupes = ListOfMembers.Distinct().ToList();
                     Console.WriteLine("List of current members assigned to Project ID: " + projectID);
-                    for (int i = 0; i < ListOfMembers.Count; i++)
+                    for (int i = 0; i < ListNoDupes.Count; i++)
                     {
                         Console.WriteLine(ListNoDupes[i]);
                     }
