@@ -243,6 +243,7 @@ namespace ConsoleApp1
     class User
     {
         private Validation validation = new Validation();
+        private Project project = new Project();
         private string UserName;    
         private string UserPassword;
         private bool onProject;
@@ -413,7 +414,8 @@ namespace ConsoleApp1
             }
         }
         private void EditTask(int projectID, string username)
-        {            
+        {
+            int edittaskid;
             using (SqlConnection conn = new SqlConnection())
             {
                 conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
@@ -424,7 +426,7 @@ namespace ConsoleApp1
                 getmaxtask.Parameters.Add(new SqlParameter("0", projectID));
                 int maxtaskid = Int32.Parse(getmaxtask.ExecuteScalar().ToString());
                 int mintaskid = Int32.Parse(getmintask.ExecuteScalar().ToString());
-                int edittaskid = validation.CheckIntString("Which task would you like to edit?: ", mintaskid, maxtaskid);
+                edittaskid = validation.CheckIntString("Which task would you like to edit?: ", mintaskid, maxtaskid);
                 SqlCommand gettask = new SqlCommand("SELECT * FROM Tasks WHERE TaskID = @0", conn);
                 gettask.Parameters.Add(new SqlParameter("0", edittaskid));
                 Console.WriteLine("Which Parameter woudl you like to update: \n1) Task Name\n2) Assigned Member\n3) Status\n4) Description");
@@ -441,6 +443,7 @@ namespace ConsoleApp1
                         break;
                     case 3:
                         changestatus(conn,edittaskid);
+                        project.changeprojectpercent(projectID,conn);
                         break;
                     case 4:
                         string newdesc = validation.readString("Please enter the new description: ");
@@ -448,6 +451,8 @@ namespace ConsoleApp1
                         break;
                 }
             }
+            Logs log = new Logs();
+            log.AddLog(edittaskid);
         }
         private void changename(string newname, SqlConnection conn, int taskID)
         {
@@ -724,7 +729,31 @@ namespace ConsoleApp1
                 command1.Parameters.Add(new SqlParameter("2", UserPassword));*/ 
     class Logs
     {
+        Validation validation = new Validation();
+        public void AddLog(int taskID)
+        {
+            using (SqlConnection conn = new SqlConnection())
+            {
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
+                conn.Open();
+                SqlCommand addlog = new SqlCommand("INSERT INTO Logs (LogID,LogTime,Logtext,TaskID) VALUES (@0,@1,@2,@3)", conn);
+                SqlCommand readlogid = new SqlCommand("SELECT Max(LogID) FROM Logs");
+                int maxlogid = Int32.Parse(readlogid.ExecuteScalar().ToString());
+                maxlogid++;
+                DateTime currentdt = DateTime.Now;
+                addlog.Parameters.Add(new SqlParameter("0", maxlogid));
+                addlog.Parameters.Add(new SqlParameter("1", currentdt));
+                string logtext = validation.readString("Please enter the update log for this task: ");
+                addlog.Parameters.Add(new SqlParameter("2", logtext));
+                addlog.Parameters.Add(new SqlParameter("3", taskID));
+                addlog.ExecuteNonQuery();
+                Console.WriteLine("Log ID: " + maxlogid + " added for task ID: " + taskID);
+            }
+        }
+        public void ViewLogs()
+        {
 
+        }
     }
     class Project
     {
@@ -1100,6 +1129,37 @@ namespace ConsoleApp1
             
             }
         } //create a function to add members that can be called by the project leader        
+        public void changeprojectpercent(int projectID, SqlConnection conn)
+        {
+            List<string> ListOfStatus = new List<string>();
+            int countofcomplete = 0;
+            SqlCommand getstatuses = new SqlCommand("SELECT Status FROM Tasks WHERE ProjectID = @0", conn);
+            SqlCommand getpercent = new SqlCommand("SELECT PercentComplete FROM Projects WHERE ProjectID = @0", conn);
+            getpercent.Parameters.Add(new SqlParameter("0", projectID));
+            getstatuses.Parameters.Add(new SqlParameter("0", projectID));
+            using (SqlDataReader reader = getstatuses.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    ListOfStatus.Add(reader[0].ToString());
+                }
+            }
+            foreach (string item in ListOfStatus)
+            {
+                if (item == "Complete")
+                {
+                    countofcomplete++;
+                }
+            }
+            SqlCommand getnumoftasks = new SqlCommand("SELECT NumberOfTasks FROM Projects WHERE ProjectID = @0", conn);
+            getnumoftasks.Parameters.Add(new SqlParameter("0", projectID));
+            int numoftasks = int.Parse(getnumoftasks.ExecuteScalar().ToString());
+            int percentcomplete = (countofcomplete / numoftasks)*100;
+            SqlCommand updatepercent = new SqlCommand("UPDATE Projects SET PercentComplete = @0 WHERE ProjectID = @1", conn);
+            updatepercent.Parameters.Add(new SqlParameter("0", percentcomplete));
+            updatepercent.Parameters.Add(new SqlParameter("1", projectID));
+            updatepercent.ExecuteNonQuery();
+        }
         public void Placeholder()
         {
             string[] tasks;
