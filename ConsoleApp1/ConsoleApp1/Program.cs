@@ -446,7 +446,7 @@ namespace ConsoleApp1
             SqlCommand updatename = new SqlCommand("UPDATE Tasks SET TaskName = @0 WHERE TaskID = @1 ", conn);
             updatename.Parameters.Add(new SqlParameter("0", newname));
             updatename.Parameters.Add(new SqlParameter("1", taskID));
-            updatename.ExecuteReader();
+            updatename.ExecuteNonQuery();
         }
         private void changemember(string newuser, SqlConnection conn, int taskID)
         {
@@ -489,7 +489,10 @@ namespace ConsoleApp1
         }
         private void changedesc(string newdesc, SqlConnection conn, int taskID)
         {
-
+            SqlCommand updatedesc = new SqlCommand("UPDATE Tasks SET Description = @0 WHERE TaskID = @1 ", conn);
+            updatedesc.Parameters.Add(new SqlParameter("0", newdesc));
+            updatedesc.Parameters.Add(new SqlParameter("1", taskID));
+            updatedesc.ExecuteNonQuery();
         }
     }
     class Admin
