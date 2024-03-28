@@ -83,7 +83,7 @@ namespace ConsoleApp1
                     case 3:
                         break;
                     case 4:
-                        logs.ViewLogs(username);
+                        
                         break;
                     case 5:
                         if (usertype == "user")
@@ -382,7 +382,7 @@ namespace ConsoleApp1
                                 if (ans4 == projectidsnodupes[i])
                                 {
                                     logs.ViewLogs(username, ans4);
-                                    valid = true;
+                                    valid2 = true;
                                 }
                             }
                             if (!valid2)
@@ -758,7 +758,7 @@ namespace ConsoleApp1
                 conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
                 conn.Open();
                 SqlCommand addlog = new SqlCommand("INSERT INTO Logs (LogID,LogTime,Logtext,TaskID,Username) VALUES (@0,@1,@2,@3,@4)", conn);
-                SqlCommand readlogid = new SqlCommand("SELECT Max(LogID) FROM Logs");
+                SqlCommand readlogid = new SqlCommand("SELECT Max(LogID) FROM Logs",conn);
                 int maxlogid = Int32.Parse(readlogid.ExecuteScalar().ToString());
                 maxlogid++;
                 DateTime currentdt = DateTime.Now;
@@ -774,21 +774,44 @@ namespace ConsoleApp1
         }
         public void ViewLogs(string username,int projectID)
         {
-            Console.WriteLine("Which of your porjects would you like to view the logs for? ");
+            List<int> ListOfIds = new List<int>();
+            List<int> NoDupesList = new List<int>();
+            int count = 0;
             using (SqlConnection conn = new SqlConnection())
             {
                 conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
                 conn.Open();
-                SqlCommand getlogs = new SqlCommand("SELECT * FROM Logs WHERE Username = @0", conn);
-                getlogs.Parameters.Add(new SqlParameter("0", username));
-                using (SqlDataReader reader = getlogs.ExecuteReader())
+                SqlCommand gettaskids = new SqlCommand("SELECT TaskID FROM Tasks WHERE ProjectID = @0", conn);
+                gettaskids.Parameters.Add(new SqlParameter("0", projectID));
+                using (SqlDataReader reader = gettaskids.ExecuteReader())
                 {
-                    Console.WriteLine("LogID|Log Date and Time|Made By|For Task|Log text");
                     while (reader.Read())
                     {
-                        Console.WriteLine(String.Format("{0}|{1}|{2}\t|{3}\t|{4}", reader[0], reader[1], reader[4], reader[3], reader[2]));
+                        ListOfIds.Add(int.Parse(reader[0].ToString()));
                     }
                 }
+                SqlCommand getlogs = new SqlCommand("SELECT * FROM Logs WHERE Username = @0 AND TaskID = @1", conn);
+                
+                for (int i = 0; i < ListOfIds.Count; i++)
+                {
+                    getlogs.Parameters.Add(new SqlParameter("0", username));
+                    getlogs.Parameters.Add(new SqlParameter("1", ListOfIds[i]));
+                    using (SqlDataReader reader = getlogs.ExecuteReader())
+                    {
+                        Console.WriteLine("LogID|Log Date and Time|Made By|For Task|Log text");
+                        while (reader.Read())
+                        {
+                            Console.WriteLine(String.Format("{0}|{1}|{2}\t|{3}\t|{4}", reader[0], reader[1], reader[4], reader[3], reader[2]));
+                            count++;
+                        }
+                    }
+                    getlogs.Parameters.Clear();         
+                }
+                if (count ==0)
+                {
+                    Console.WriteLine("No Update logs for this project");
+                }
+                
             }
         }
     }
