@@ -902,22 +902,20 @@ namespace ConsoleApp1
             }
             if (usertype == "admin")
             {
-                Console.WriteLine("Please choose an option: \n1) Add new Project\n2) Delete a Project\n3) Edit a Project\n4) View a Projects Timeline\n5) View members working on a project\n6) Exit");
-                int ans = validation.CheckIntString("Please Enter your choice: ", 1, 6);
+                Console.WriteLine("Please choose an option: \n1) Add new Project\n2) Delete a Project\n3) Edit a Project\n4) View members working on a project\n5) Exit");
+                int ans = validation.CheckIntString("Please Enter your choice: ", 1, 5);
                 switch (ans)
                 {
                     case 1:
-                        AddProject(validation);
+                        AddProject(validation,username);
                         break;
                     case 2:
                         DeleteProject(validation);
                         break;
                     case 3:
                         EditProject(username,validation,user);
-                        break;
+                        break;                   
                     case 4:
-                        break;
-                    case 5:
                         ViewProjectMembers(validation);
                         break;
                     default:
@@ -926,7 +924,7 @@ namespace ConsoleApp1
             }
             
         }
-        public void AddProject(Validation validation)
+        public void AddProject(Validation validation, string username)
         {            
             ProjectName = validation.readString("What would you like the Project to be called?: ");
             NumofTasks = validation.CheckIntString("How many tasks will this project have?(Max 50): ",1,50);
@@ -959,7 +957,8 @@ namespace ConsoleApp1
                     Console.WriteLine("Error occured. Sql error " + er.Message);
                 }
             }
-            AddTask(maxid, validation);
+            AddTask(maxid, validation,username);
+            
             
         }
         public void DeleteProject(Validation validation)
@@ -1181,7 +1180,7 @@ namespace ConsoleApp1
             user.EditTask(projectID,username,validation);
         }
         
-        private void AddTask(int projectID,Validation validation)
+        private void AddTask(int projectID,Validation validation, string username)
         {
             List<string> ListofMembers = new List<string>();
             string taskname;
@@ -1238,6 +1237,8 @@ namespace ConsoleApp1
                         addtask.Parameters.Add(new SqlParameter("4", taskdesc));
                         addtask.ExecuteNonQuery();
                         Console.WriteLine("Task '" + taskname + "' added to projectID " + projectID);
+                        Logs log = new Logs();
+                        log.AddLog(taskid,username,validation);
                     }
                 }
                 catch (SqlException er)
