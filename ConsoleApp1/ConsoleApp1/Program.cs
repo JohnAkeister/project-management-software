@@ -202,18 +202,18 @@ namespace ConsoleApp1
         private User user = new User();
         public string BeginLogin(ref string username, Validation validation)
         {
-            
+            string usertype;
             int choice = validation.CheckIntString("Would you like to login to an user or admin account: \n1) User\n2) Admin\n", 1, 2);
             switch (choice)
             {
                 case 1:
-                    
-                    UserLogin(ref username, validation);
+                    usertype = "user";
+                    UserLogin(ref username, validation, usertype);
                     return "user";
                     break;
                 case 2:
-                    
-                    UserLogin(ref username,validation);
+                    usertype = "admin";
+                    UserLogin(ref username,validation,usertype);
                     return "admin";
                     break;
                 default:
@@ -222,7 +222,7 @@ namespace ConsoleApp1
             }
             
         }
-        private void UserLogin(ref string username,Validation validation)
+        private void UserLogin(ref string username,Validation validation,string usertype)
         {
             bool valid = false;
             
@@ -230,7 +230,7 @@ namespace ConsoleApp1
             {
                 username = validation.readString("\nPlease enter your UserName: ");
                 string password = validation.readString("\nPlease enter your Password: ");            
-                valid = user.SetUpUser(ref username, password);
+                valid = user.SetUpUser(ref username, password,usertype);
             }
             
         }
@@ -259,7 +259,7 @@ namespace ConsoleApp1
             this.UserPassword = "";
             this.onProject = false;
         }
-        public bool SetUpUser(ref string name, string password)
+        public bool SetUpUser(ref string name, string password, string usertype)
         {
             this.UserName = name;
             this.UserPassword = password;           
@@ -277,8 +277,8 @@ namespace ConsoleApp1
                         
                         while (reader.Read())
                         {
-                            //if ((char.Parse(reader[3].ToString()) == 'Y' && (usertype == "admin" || usertype =="user")) ||(char.Parse(reader[3].ToString()) == 'N' && usertype == "user"))
-                            //{
+                            if ((char.Parse(reader[3].ToString()) == 'Y' && (usertype == "admin" || usertype =="user")) ||(char.Parse(reader[3].ToString()) == 'N' && usertype == "user"))
+                            {
                                 if (reader[2].ToString() == UserPassword)
                                 {
                                     Console.WriteLine("Login Successful");
@@ -292,12 +292,12 @@ namespace ConsoleApp1
                                     Console.WriteLine("Login Unsuccesful. Please re-enter username and password");
                                     return false;
                                 }
-                            //}
-                            //else
-                            //{
-                                //Console.WriteLine("Invalid you cannot access this account type");
-                                //return false;
-                            //}
+                            }
+                            else
+                            {
+                                Console.WriteLine("Invalid you cannot access this account type with this user. Please enter a correct account type or close program.");
+                                return false;
+                            }
 
                             
                         }
