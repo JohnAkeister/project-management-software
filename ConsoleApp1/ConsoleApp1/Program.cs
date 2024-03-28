@@ -345,19 +345,24 @@ namespace ConsoleApp1
                 switch (ans)
                 {
                     case 1:
-                        int ans2 = validation.CheckIntString("\nPlease enter the project ID you wish to view the tasks of: ", 1, projectidsnodupes.Last());
-                        for (int i = 0; i < projectidsnodupes.Count; i++) // stops user from accessing a project they know exists but cant see
+                        bool valid = false;
+                        while (!valid)
                         {
-                            if (ans2 == projectidsnodupes[i])
+                            int ans2 = validation.CheckIntString("\nPlease enter the project ID you wish to view the tasks of: ", 1, projectidsnodupes.Last());
+                            for (int i = 0; i < projectidsnodupes.Count; i++) // stops user from accessing a project they know exists but cant see
                             {
-                                ViewProjectTasks(ans2, username);
+                                if (ans2 == projectidsnodupes[i])
+                                {
+                                    ViewProjectTasks(ans2, username);
+                                    valid = true;
+                                }
                             }
-                            else
+                            if (!valid)
                             {
-                                Console.WriteLine("You do not have access to this project returning to menu");
+                                Console.WriteLine("You do not have access to this project please enter a different ID");
                             }
-                            
                         }
+                        
                         
                         break;
                     case 2:
@@ -714,6 +719,10 @@ namespace ConsoleApp1
     command1.Parameters.Add(new SqlParameter("0", UserID));
                 command1.Parameters.Add(new SqlParameter("1", UserName)); code to create new user, will be useful for admin class
                 command1.Parameters.Add(new SqlParameter("2", UserPassword));*/ 
+    class Logs
+    {
+
+    }
     class Project
     {
         Validation validation = new Validation();
