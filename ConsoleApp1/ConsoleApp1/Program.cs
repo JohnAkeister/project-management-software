@@ -31,7 +31,7 @@ namespace ConsoleApp1
         }
         public static void BeginProgram()
         {      
-            usertype = login.BeginLogin(ref username);
+            usertype = login.BeginLogin(ref username, validation);
             int ans = 0;
             bool exit = false;
             int adminmenu = 0;
@@ -54,12 +54,12 @@ namespace ConsoleApp1
                 switch (ans)
                 {
                     case 1:
-                        project.ViewProjects(usertype,username);
+                        project.ViewProjects(usertype,username,validation, user);
                         break;
                     case 2:
                         if (usertype == "user")
                         {
-                            user.ViewUsersProjects(username); // From this allow a user to edit a project if they are the owner of the project
+                            user.ViewUsersProjects(username, validation); // From this allow a user to edit a project if they are the owner of the project
                         }
                         else if(usertype == "admin")
                         {                            
@@ -70,10 +70,10 @@ namespace ConsoleApp1
                                     admin.AddUser();
                                     break;
                                 case 2:
-                                    admin.DeleteUser();
+                                    admin.DeleteUser(validation);
                                     break;
                                 case 3:
-                                    admin.EditUser();
+                                    admin.EditUser(validation);
                                     break;
                                 default:
                                     break;
@@ -101,12 +101,12 @@ namespace ConsoleApp1
         static void DisplayUserMenu()
         {
             Console.WriteLine("User Menu for "+username+": ");
-            Console.WriteLine("\n1) View all Projects\n2) View your Projects\n3) View your notifications\n4) View a Project's Timeline\n5) Exit");
+            Console.WriteLine("\n1) View all Projects\n2) View your Projects\n3) View your notifications\n4) Change your password\n5) Exit");
         }
         static void DisplayAdminMenu()
         {
             Console.WriteLine("Admin Menu for " + username + ": ");
-            Console.WriteLine("\n1) View all Projects\n2) View all Members\n3) View your notifications\n4) View a Project's Timeline\n5) Exit");
+            Console.WriteLine("\n1) View all Projects\n2) View all Members\n3) View your notifications\n4) \n5) Exit");
         }
 
 
@@ -198,19 +198,22 @@ namespace ConsoleApp1
     }
     class Login
     {
-        private Validation validation = new Validation();
+        
         private User user = new User();
-        public string BeginLogin(ref string username)
+        public string BeginLogin(ref string username, Validation validation)
         {
+            
             int choice = validation.CheckIntString("Would you like to login to an user or admin account: \n1) User\n2) Admin\n", 1, 2);
             switch (choice)
             {
                 case 1:
-                    UserLogin(ref username);
+                    
+                    UserLogin(ref username, validation);
                     return "user";
                     break;
                 case 2:
-                    UserLogin(ref username);
+                    
+                    UserLogin(ref username,validation);
                     return "admin";
                     break;
                 default:
@@ -219,7 +222,7 @@ namespace ConsoleApp1
             }
             
         }
-        private void UserLogin(ref string username)
+        private void UserLogin(ref string username,Validation validation)
         {
             bool valid = false;
             
@@ -243,8 +246,7 @@ namespace ConsoleApp1
         }
     }
     class User
-    {
-        private Validation validation = new Validation();
+    {        
         private Project project = new Project();
         private Logs logs = new Logs();
         private string UserName;    
@@ -275,19 +277,29 @@ namespace ConsoleApp1
                         
                         while (reader.Read())
                         {
-                            if (reader[2].ToString() == UserPassword)
-                            {
-                                Console.WriteLine("Login Successful");
-                                Console.WriteLine("UserID\tUsername\tPassword\tIsAdmin?");
-                                Console.WriteLine(String.Format("{0}\t | {1}\t | {2}\t | {3}", reader[0], reader[1], reader[2], reader[3]));
-                                name = this.UserName;
-                                return true;
-                            }
-                            else
-                            {
-                                Console.WriteLine("Login Unsuccesful. Please re-enter username and password");
-                                return false;
-                            }
+                            //if ((char.Parse(reader[3].ToString()) == 'Y' && (usertype == "admin" || usertype =="user")) ||(char.Parse(reader[3].ToString()) == 'N' && usertype == "user"))
+                            //{
+                                if (reader[2].ToString() == UserPassword)
+                                {
+                                    Console.WriteLine("Login Successful");
+                                    Console.WriteLine("UserID\tUsername\tPassword\tIsAdmin?");
+                                    Console.WriteLine(String.Format("{0}\t | {1}\t | {2}\t | {3}", reader[0], reader[1], reader[2], reader[3]));
+                                    name = this.UserName;
+                                    return true;
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Login Unsuccesful. Please re-enter username and password");
+                                    return false;
+                                }
+                            //}
+                            //else
+                            //{
+                                //Console.WriteLine("Invalid you cannot access this account type");
+                                //return false;
+                            //}
+
+                            
                         }
                     }
                 }
@@ -301,7 +313,7 @@ namespace ConsoleApp1
 
             }
         }
-        public void ViewUsersProjects(string username)
+        public void ViewUsersProjects(string username, Validation validation)
         {
             List<int> projectids = new List<int>();
             List<int> projectidsnodupes = new List<int>();
@@ -371,7 +383,7 @@ namespace ConsoleApp1
                         break;
                     case 2:
                         int ans3 = validation.CheckIntString("\nPlease enter the project ID you wish to edit that you are the owner of: ", 1, projectidsnodupes.Last());
-                        EditProject(ans3,username);
+                        EditProject(ans3,username, validation);
                         break;
                     case 3:
                         bool valid2 = false;
@@ -414,7 +426,7 @@ namespace ConsoleApp1
                 }                
             }
         }
-        private void EditProject(int projectID,string username)
+        private void EditProject(int projectID,string username,Validation validation)
         {
             using (SqlConnection conn = new SqlConnection())
             {
@@ -426,7 +438,7 @@ namespace ConsoleApp1
                 if (username == ProjectOwner)
                 {
                     ViewProjectTasks(projectID);
-                    EditTask(projectID,username);
+                    EditTask(projectID,username,validation);
                 }
                 else
                 {
@@ -434,7 +446,7 @@ namespace ConsoleApp1
                 }
             }
         }
-        public void EditTask(int projectID, string username)
+        public void EditTask(int projectID, string username, Validation validation)
         {
             int edittaskid;
             using (SqlConnection conn = new SqlConnection())
@@ -460,10 +472,10 @@ namespace ConsoleApp1
                         break;
                     case 2:
                         string newuser = validation.readString("Please enter the name of the new assigned member: ");
-                        changemember(newuser,conn,edittaskid);
+                        changemember(newuser,conn,edittaskid,validation);
                         break;
                     case 3:
-                        changestatus(conn,edittaskid);
+                        changestatus(conn,edittaskid, validation);
                         project.changeprojectpercent(projectID,conn);
                         break;
                     case 4:
@@ -473,7 +485,7 @@ namespace ConsoleApp1
                 }
             }
             Logs log = new Logs();
-            log.AddLog(edittaskid,username);
+            log.AddLog(edittaskid,username, validation);
         }
         private void changename(string newname, SqlConnection conn, int taskID)
         {
@@ -482,7 +494,7 @@ namespace ConsoleApp1
             updatename.Parameters.Add(new SqlParameter("1", taskID));
             updatename.ExecuteNonQuery();
         }
-        private void changemember(string newuser, SqlConnection conn, int taskID)
+        private void changemember(string newuser, SqlConnection conn, int taskID,Validation validation)
         {
             List<string> usernames = new List<string>();
             SqlCommand readnames = new SqlCommand("SELECT Username FROM Logins",conn);
@@ -517,7 +529,7 @@ namespace ConsoleApp1
             changemember.ExecuteNonQuery();
             Console.WriteLine("Assigned changed to " + newuser + " for Task ID: " + taskID);
         }
-        private void changestatus(SqlConnection conn, int taskID)
+        private void changestatus(SqlConnection conn, int taskID,Validation validation)
         {
             string newstatus = "";
             SqlCommand getcurrentstatus = new SqlCommand("SELECT Status FROM Tasks WHERE TaskID = @0",conn);
@@ -593,7 +605,7 @@ namespace ConsoleApp1
     }
     class Admin
     {
-        Validation validation = new Validation();
+        
         public void AddUser()
         {
             string result = "";
@@ -630,7 +642,7 @@ namespace ConsoleApp1
                                
             }
         }
-        public void DeleteUser()
+        public void DeleteUser(Validation validation)
         {
             Console.WriteLine("Please enter the ID of the user you wish to remove: ");
             int ans = validation.ReadInt(Console.ReadLine());
@@ -661,7 +673,7 @@ namespace ConsoleApp1
                 }
             }
         }
-        public void EditUser()
+        public void EditUser(Validation validation)
         {
             
                 Console.WriteLine("Please enter the ID of the user you wish to edit: ");
@@ -671,10 +683,10 @@ namespace ConsoleApp1
                 switch (ans)
                 {
                     case 1:
-                    UpdateName(reply);
+                    UpdateName(reply,validation);
                         break;
                     case 2:
-                    UpdatePassword(reply);
+                    UpdatePassword(reply, validation);
                         break;
                     case 3:
                     UpdateAdmin(reply);
@@ -684,7 +696,7 @@ namespace ConsoleApp1
             
             
         }
-        private void UpdateName(string UserID)
+        private void UpdateName(string UserID,Validation validation)
         {
             string newname = validation.readString("Please enter the new username: ");
             using (SqlConnection conn = new SqlConnection())
@@ -698,7 +710,7 @@ namespace ConsoleApp1
                 Console.WriteLine("Username updated for UserID: " + UserID);
             }
         }
-        private void UpdatePassword(string UserID)
+        private void UpdatePassword(string UserID,Validation validation)
         {
             string newpass = validation.readString("Please enter the new password: ");
             using (SqlConnection conn = new SqlConnection())
@@ -750,8 +762,8 @@ namespace ConsoleApp1
                 command1.Parameters.Add(new SqlParameter("2", UserPassword));*/ 
     class Logs
     {
-        Validation validation = new Validation();
-        public void AddLog(int taskID, string username)
+        
+        public void AddLog(int taskID, string username,Validation validation)
         {
             using (SqlConnection conn = new SqlConnection())
             {
@@ -820,9 +832,8 @@ namespace ConsoleApp1
 
     }
     class Project
-    {
-        Validation validation = new Validation();
-        private User user = new User();
+    {        
+       
         private List<Task> ListOfTasks;
         private string Status;
         private string ProjectName;
@@ -833,7 +844,7 @@ namespace ConsoleApp1
         private string ProjectOwner;
         private int zero = 0;
 
-        public void ViewProjects(string usertype,string username)
+        public void ViewProjects(string usertype,string username, Validation validation, User user)
         {
             using (SqlConnection conn = new SqlConnection())
             {
@@ -857,18 +868,18 @@ namespace ConsoleApp1
                 switch (ans)
                 {
                     case 1:
-                        AddProject();
+                        AddProject(validation);
                         break;
                     case 2:
-                        DeleteProject();
+                        DeleteProject(validation);
                         break;
                     case 3:
-                        EditProject(username);
+                        EditProject(username,validation,user);
                         break;
                     case 4:
                         break;
                     case 5:
-                        ViewProjectMembers();
+                        ViewProjectMembers(validation);
                         break;
                     default:
                         break;
@@ -876,7 +887,7 @@ namespace ConsoleApp1
             }
             
         }
-        public void AddProject()
+        public void AddProject(Validation validation)
         {            
             ProjectName = validation.readString("What would you like the Project to be called?: ");
             NumofTasks = validation.CheckIntString("How many tasks will this project have?(Max 50): ",1,50);
@@ -909,10 +920,10 @@ namespace ConsoleApp1
                     Console.WriteLine("Error occured. Sql error " + er.Message);
                 }
             }
-            AddTask(maxid);
+            AddTask(maxid, validation);
             
         }
-        public void DeleteProject()
+        public void DeleteProject(Validation validation)
         {
             int deleteID;
             using (SqlConnection conn = new SqlConnection())
@@ -940,7 +951,7 @@ namespace ConsoleApp1
                 }
             }
         }
-        public void EditProject(string username)
+        public void EditProject(string username, Validation validation, User user)
         {
             int projectID;
             Console.WriteLine();
@@ -952,16 +963,16 @@ namespace ConsoleApp1
                 switch (ans)
                 {
                     case 1:
-                        EditProjectName(projectID);
+                        EditProjectName(projectID,validation);
                         break;
                     case 2:
-                        EditProjectOwner(projectID);
+                        EditProjectOwner(projectID, validation);
                         break;
                     case 3:
-                        EditProjectStatus(projectID);
+                        EditProjectStatus(projectID, validation);
                         break;
                     case 4:
-                        EditProjectTasks(projectID,username);
+                        EditProjectTasks(projectID,username,validation,user);
                         break;
                     default:
                         valid = true;
@@ -970,7 +981,7 @@ namespace ConsoleApp1
             }
             
         } // view project tasks needs to be done
-        public void ViewProjectMembers()
+        public void ViewProjectMembers(Validation validation)
         {
             List<string> ListOfMembers = new List<string>();
             List<string> ListNoDupes = new List<string>();
@@ -997,7 +1008,7 @@ namespace ConsoleApp1
                 }
             }
         }
-        private void EditProjectName(int projectID)
+        private void EditProjectName(int projectID,Validation validation)
         {
             using (SqlConnection conn = new SqlConnection())
             {
@@ -1014,7 +1025,7 @@ namespace ConsoleApp1
                 Console.WriteLine("Project " + projectID + " name updated to " + newname);
             }
         }
-        private void EditProjectOwner(int projectID)
+        private void EditProjectOwner(int projectID,Validation validation)
         {
             List<string> ListofMembers = new List<string>();
             string newname = "";
@@ -1060,7 +1071,7 @@ namespace ConsoleApp1
                 Console.WriteLine("Project " + projectID + " owner updated to " + newname);
             }
         }
-        private void EditProjectStatus(int projectID)
+        private void EditProjectStatus(int projectID, Validation validation)
         {
             string currentstatus = "";
             string newstatus = "Not Started";
@@ -1124,14 +1135,14 @@ namespace ConsoleApp1
                 Console.WriteLine("Project " + projectID + " ID status has been changed from " + currentstatus + " to " + newstatus);
             }
         }
-        private void EditProjectTasks(int projectID,string username)
+        private void EditProjectTasks(int projectID,string username,Validation validation, User user)
         {
             user.ViewProjectTasks(projectID);
             Console.WriteLine("Which task would you like to edit?: ");
-            user.EditTask(projectID,username);
+            user.EditTask(projectID,username,validation);
         }
         
-        private void AddTask(int projectID)
+        private void AddTask(int projectID,Validation validation)
         {
             List<string> ListofMembers = new List<string>();
             string taskname;
@@ -1229,30 +1240,8 @@ namespace ConsoleApp1
             updatepercent.Parameters.Add(new SqlParameter("1", projectID));
             updatepercent.ExecuteNonQuery();
         }
-        public void Placeholder()
-        {
-            string[] tasks;
-            Console.WriteLine("Please enter a Project name");
-            string projectname = Console.ReadLine();
-            Console.WriteLine("How many team members will be assigned?");
-            int numofusers = Convert.ToInt32(Console.ReadLine());
-            Console.WriteLine("How many tasks will be part of this project?");
-            int numoftasks = Convert.ToInt32(Console.ReadLine());
-            tasks = new string[numoftasks];
-            for (int i = 0; i < numoftasks; i++)
-            {
-
-                Console.WriteLine("Please enter the task name");
-                tasks[i] = Console.ReadLine();
-            }
-            Console.WriteLine("Project: " + projectname + "\nList of tasks: ");
-            for (int i = 0; i < tasks.Length; i++)
-            {
-                Console.WriteLine((i + 1) + ") " + tasks[i]);
-
-            }
-            Console.ReadLine();
-        }
+        
+        
         
     }
 }
