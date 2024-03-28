@@ -485,6 +485,68 @@ namespace ConsoleApp1
         }
         private void changestatus(SqlConnection conn, int taskID)
         {
+            string newstatus = "";
+            SqlCommand getcurrentstatus = new SqlCommand("SELECT Status FROM Tasks WHERE TaskID = @0",conn);
+            getcurrentstatus.Parameters.Add(new SqlParameter("0", taskID));
+            string currentstatus = getcurrentstatus.ExecuteScalar().ToString();
+            if (currentstatus.Contains("Not Started"))
+            {
+                Console.WriteLine("Current status of project is: " + currentstatus);
+                Console.WriteLine("Available statuses for this project are: \n1) In-Progress\n2) Completed");
+                int ans = validation.CheckIntString("Please enter your choice (1-2): ", 1, 2);
+                switch (ans)
+                {
+                    case 1:
+                        newstatus = "In-Progress";
+                        break;
+                    case 2:
+                        newstatus = "Completed";
+                        break;
+                    default:
+                        newstatus = "error";
+                        break;
+                }
+            }
+            else if (currentstatus.Contains("In-Progress"))
+            {
+                Console.WriteLine("Current status of project is: " + currentstatus);
+                Console.WriteLine("Available statuses for this project are: \n1) Not Started\n2) Completed");
+                int ans = validation.CheckIntString("Please enter your choice (1-2): ", 1, 2);
+                switch (ans)
+                {
+                    case 1:
+                        newstatus = "Not Started";
+                        break;
+                    case 2:
+                        newstatus = "Completed";
+                        break;
+                    default:
+                        newstatus = "error";
+                        break;
+                }
+            }
+            else if (currentstatus.Contains("Completed"))
+            {
+                Console.WriteLine("Current status of project is: " + currentstatus);
+                Console.WriteLine("Available statuses for this project are: \n1) Not Started\n2) In-Progress");
+                int ans = validation.CheckIntString("Please enter your choice (1-2): ", 1, 2);
+                switch (ans)
+                {
+                    case 1:
+                        newstatus = "Not Started";
+                        break;
+                    case 2:
+                        newstatus = "In-Progress";
+                        break;
+                    default:
+                        newstatus = "error";
+                        break;
+                }
+            }
+            SqlCommand updatestatus = new SqlCommand("UPDATE Tasks SET Status = @0 WHERE TaskID = @1", conn);
+            updatestatus.Parameters.Add(new SqlParameter("0", newstatus));
+            updatestatus.Parameters.Add(new SqlParameter("1", taskID));
+            updatestatus.ExecuteNonQuery();
 
         }
         private void changedesc(string newdesc, SqlConnection conn, int taskID)
