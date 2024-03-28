@@ -755,6 +755,10 @@ namespace ConsoleApp1
 
         }
     }
+    class Notifications
+    {
+
+    }
     class Project
     {
         Validation validation = new Validation();
