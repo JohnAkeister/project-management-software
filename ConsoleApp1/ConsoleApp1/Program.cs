@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.CodeDom;
 using System.Runtime.CompilerServices;
+using System.Xml.Linq;
 
 namespace ConsoleApp1
 {
@@ -21,6 +22,7 @@ namespace ConsoleApp1
         static Project project = new Project();
         static User user = new User();
         static Logs logs = new Logs();
+        static Notifications notifs = new Notifications();
         static string usertype;
         static string username;
         static int maxusermenu = 5;
@@ -81,32 +83,25 @@ namespace ConsoleApp1
                         }
                         break;
                     case 3:
+                        notifs.ViewNotifications(validation,username);
                         break;
                     case 4:
+                        exit = true;
+                        break;
+                    
                         
-                        break;
-                    case 5:
-                        if (usertype == "user")
-                        {
-                            exit = true;
-                        }
-                        else
-                        {
-                            exit = true;
-                        }
-                        break;
                 }
             }
         }
         static void DisplayUserMenu()
         {
             Console.WriteLine("User Menu for "+username+": ");
-            Console.WriteLine("\n1) View all Projects\n2) View your Projects\n3) View your notifications\n4) Change your password\n5) Exit");
+            Console.WriteLine("\n1) View all Projects\n2) View your Projects\n3) View your notifications\n4) Exit");
         }
         static void DisplayAdminMenu()
         {
             Console.WriteLine("Admin Menu for " + username + ": ");
-            Console.WriteLine("\n1) View all Projects\n2) View all Members\n3) View your notifications\n4) \n5) Exit");
+            Console.WriteLine("\n1) View all Projects\n2) View all Members\n3) View your notifications\n4) Exit");
         }
 
 
@@ -765,13 +760,15 @@ namespace ConsoleApp1
         
         public void AddLog(int taskID, string username,Validation validation)
         {
+            Notifications notif = new Notifications();
+            int maxlogid;
             using (SqlConnection conn = new SqlConnection())
             {
                 conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
                 conn.Open();
                 SqlCommand addlog = new SqlCommand("INSERT INTO Logs (LogID,LogTime,Logtext,TaskID,Username) VALUES (@0,@1,@2,@3,@4)", conn);
                 SqlCommand readlogid = new SqlCommand("SELECT Max(LogID) FROM Logs",conn);
-                int maxlogid = Int32.Parse(readlogid.ExecuteScalar().ToString());
+                maxlogid = Int32.Parse(readlogid.ExecuteScalar().ToString());
                 maxlogid++;
                 DateTime currentdt = DateTime.Now;
                 addlog.Parameters.Add(new SqlParameter("0", maxlogid));
@@ -783,6 +780,7 @@ namespace ConsoleApp1
                 addlog.ExecuteNonQuery();
                 Console.WriteLine("Log ID: " + maxlogid + " added for task ID: " + taskID);
             }
+            notif.NewNotification(maxlogid,validation);
         }
         public void ViewLogs(string username,int projectID)
         {
@@ -829,7 +827,48 @@ namespace ConsoleApp1
     }
     class Notifications
     {
-
+        public void NewNotification(int logID, Validation validation)
+        {
+            using (SqlConnection conn = new SqlConnection())
+            {
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
+                conn.Open();
+                SqlCommand gettaskid = new SqlCommand("SELECT TaskID FROM Logs WHERE LogID = @0", conn);
+                gettaskid.Parameters.Add(new SqlParameter("0", logID));
+                int taskID = int.Parse(gettaskid.ExecuteScalar().ToString());
+                SqlCommand getassignedmember = new SqlCommand("SELECT AssignedMember FROM Tasks WHERE TaskID = @0", conn);
+                getassignedmember.Parameters.Add(new SqlParameter("0", taskID));
+                string assignedmember = getassignedmember.ExecuteScalar().ToString();
+                SqlCommand newnotif = new SqlCommand("INSERT INTO Notifications (NotifID,NotifText,LogID,Member) VALUES (@0,@1,@2,@3)",conn);
+                SqlCommand getmaxid = new SqlCommand("SELECT Max(NotifID) FROM Notifications", conn);
+                int maxid = int.Parse(getmaxid.ExecuteScalar().ToString());
+                maxid++;
+                newnotif.Parameters.Add(new SqlParameter("0", maxid));
+                string notiftext = "New notification for user " + assignedmember + ". There has been an update to task " + taskID + ". Please check your projects and the project timelines.";
+                newnotif.Parameters.Add(new SqlParameter("1", notiftext));
+                newnotif.Parameters.Add(new SqlParameter("2", logID));
+                newnotif.Parameters.Add(new SqlParameter("3", assignedmember));
+                newnotif.ExecuteNonQuery();
+            }
+        }
+        public void ViewNotifications(Validation validation, string username)
+        {
+            using (SqlConnection conn = new SqlConnection())
+            {
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
+                conn.Open();
+                SqlCommand getnotifs = new SqlCommand("SELECT NotifID,NotifText FROM Notifications WHERE Member = @0", conn);
+                getnotifs.Parameters.Add(new SqlParameter("0", username));
+                using (SqlDataReader reader = getnotifs.ExecuteReader())
+                {
+                    Console.WriteLine("Notification ID | Notification");
+                    while (reader.Read())
+                    {
+                        Console.WriteLine(String.Format("{0}\t|{1}", reader[0], reader[1]));
+                    }
+                }
+            }
+        }
     }
     class Project
     {        
