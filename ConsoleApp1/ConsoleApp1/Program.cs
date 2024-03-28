@@ -419,9 +419,12 @@ namespace ConsoleApp1
                 conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
                 conn.Open();
                 SqlCommand getmaxtask = new SqlCommand("SELECT Max(TaskID) FROM Tasks WHERE ProjectID = @0", conn);
+                SqlCommand getmintask = new SqlCommand("SELECT Min(TaskID) FROM Tasks WHERE ProjectID = @0", conn);
+                getmintask.Parameters.Add(new SqlParameter("0", projectID));
                 getmaxtask.Parameters.Add(new SqlParameter("0", projectID));
                 int maxtaskid = Int32.Parse(getmaxtask.ExecuteScalar().ToString());
-                int edittaskid = validation.CheckIntString("Which task would you like to edit?: ", 1, maxtaskid);
+                int mintaskid = Int32.Parse(getmintask.ExecuteScalar().ToString());
+                int edittaskid = validation.CheckIntString("Which task would you like to edit?: ", mintaskid, maxtaskid);
                 SqlCommand gettask = new SqlCommand("SELECT * FROM Tasks WHERE TaskID = @0", conn);
                 gettask.Parameters.Add(new SqlParameter("0", edittaskid));
                 Console.WriteLine("Which Parameter woudl you like to update: \n1) Task Name\n2) Assigned Member\n3) Status\n4) Description");
