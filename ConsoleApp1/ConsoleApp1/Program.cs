@@ -393,7 +393,69 @@ namespace ConsoleApp1
             {
                 conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
                 conn.Open();
+                SqlCommand getproject = new SqlCommand("SELECT ProjectOwner FROM Projects WHERE ProjectID = @0", conn);
+                getproject.Parameters.Add(new SqlParameter("0", projectID));
+                string ProjectOwner = getproject.ExecuteScalar().ToString();
+                if (username == ProjectOwner)
+                {
+                    ViewProjectTasks(projectID, username);
+                    EditTask(projectID,username);
+                }
+                else
+                {
+                    Console.WriteLine("You do not own this project and cannot edit it");
+                }
             }
+        }
+        private void EditTask(int projectID, string username)
+        {            
+            using (SqlConnection conn = new SqlConnection())
+            {
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
+                conn.Open();
+                SqlCommand getmaxtask = new SqlCommand("SELECT Max(TaskID) FROM Tasks WHERE ProjectID = @0", conn);
+                getmaxtask.Parameters.Add(new SqlParameter("0", projectID));
+                int maxtaskid = Int32.Parse(getmaxtask.ExecuteScalar().ToString());
+                int edittaskid = validation.CheckIntString("Which task would you like to edit?: ", 1, maxtaskid);
+                SqlCommand gettask = new SqlCommand("SELECT * FROM Tasks WHERE TaskID = @0", conn);
+                gettask.Parameters.Add(new SqlParameter("0", edittaskid));
+                Console.WriteLine("Which Parameter woudl you like to update: \n1) Task Name\n2) Assigned Member\n3) Status\n4) Description");
+                int ans = validation.CheckIntString("Please enter your choice (1-4): ", 1, 4);
+                switch (ans)
+                {
+                    case 1:
+                        string newname = validation.readString("Please enter the new name: ");
+                        changename();
+                        break;
+                    case 2:
+                        string newuser = validation.readString("Please enter the name of the new assigned member: ");
+                        changemember();
+                        break;
+                    case 3:
+                        changestatus();
+                        break;
+                    case 4:
+                        string newdesc = validation.readString("Please enter the new description: ");
+                        changedesc();
+                        break;
+                }
+            }
+        }
+        private void changename()
+        {
+
+        }
+        private void changemember()
+        {
+
+        }
+        private void changestatus()
+        {
+
+        }
+        private void changedesc()
+        {
+
         }
     }
     class Admin
