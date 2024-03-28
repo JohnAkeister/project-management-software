@@ -20,6 +20,7 @@ namespace ConsoleApp1
         static Admin admin = new Admin();
         static Project project = new Project();
         static User user = new User();
+        static Logs logs = new Logs();
         static string usertype;
         static string username;
         static int maxusermenu = 5;
@@ -82,6 +83,7 @@ namespace ConsoleApp1
                     case 3:
                         break;
                     case 4:
+                        logs.ViewLogs(username);
                         break;
                     case 5:
                         if (usertype == "user")
@@ -99,12 +101,12 @@ namespace ConsoleApp1
         static void DisplayUserMenu()
         {
             Console.WriteLine("User Menu for "+username+": ");
-            Console.WriteLine("\n1) View all Projects\n2) View your Projects\n3) View your notifications\n4) Change your password\n5) Exit");
+            Console.WriteLine("\n1) View all Projects\n2) View your Projects\n3) View your notifications\n4) View a Project's Timeline\n5) Exit");
         }
         static void DisplayAdminMenu()
         {
             Console.WriteLine("Admin Menu for " + username + ": ");
-            Console.WriteLine("\n1) View all Projects\n2) View all Members\n3) View your notifications\n4) Change your password\n5) Exit");
+            Console.WriteLine("\n1) View all Projects\n2) View all Members\n3) View your notifications\n4) View a Project's Timeline\n5) Exit");
         }
 
 
@@ -244,6 +246,7 @@ namespace ConsoleApp1
     {
         private Validation validation = new Validation();
         private Project project = new Project();
+        private Logs logs = new Logs();
         private string UserName;    
         private string UserPassword;
         private bool onProject;
@@ -341,8 +344,8 @@ namespace ConsoleApp1
             int ans = 0;
             while (ans !=3)
             {
-                Console.WriteLine("What would you like to do?\n1) View a projects tasks\n2) Edit a project you are the owner of\n3) Return to menu");
-                ans = validation.CheckIntString("Enter your choice (1-3): ", 1, 3);
+                Console.WriteLine("What would you like to do?\n1) View a projects tasks\n2) Edit a project you are the owner of\n3) View a project's timeline\n4) Return to Main Menu");
+                ans = validation.CheckIntString("Enter your choice (1-4): ", 1, 4);
                 switch (ans)
                 {
                     case 1:
@@ -369,6 +372,24 @@ namespace ConsoleApp1
                     case 2:
                         int ans3 = validation.CheckIntString("\nPlease enter the project ID you wish to edit that you are the owner of: ", 1, projectidsnodupes.Last());
                         EditProject(ans3,username);
+                        break;
+                    case 3:
+                        bool valid2 = false;
+                        
+                            int ans4 = validation.CheckIntString("\nPlease enter the project ID you wish to view the tasks of: ", 1, projectidsnodupes.Last());
+                            for (int i = 0; i < projectidsnodupes.Count; i++) // stops user from accessing a project they know exists but cant see
+                            {
+                                if (ans4 == projectidsnodupes[i])
+                                {
+                                    logs.ViewLogs(username, ans4);
+                                    valid = true;
+                                }
+                            }
+                            if (!valid2)
+                            {
+                                Console.WriteLine("You do not have access to view the timeline of this project");
+                            }
+                        
                         break;
                     default:
                         break;
@@ -452,7 +473,7 @@ namespace ConsoleApp1
                 }
             }
             Logs log = new Logs();
-            log.AddLog(edittaskid);
+            log.AddLog(edittaskid,username);
         }
         private void changename(string newname, SqlConnection conn, int taskID)
         {
@@ -730,13 +751,13 @@ namespace ConsoleApp1
     class Logs
     {
         Validation validation = new Validation();
-        public void AddLog(int taskID)
+        public void AddLog(int taskID, string username)
         {
             using (SqlConnection conn = new SqlConnection())
             {
                 conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
                 conn.Open();
-                SqlCommand addlog = new SqlCommand("INSERT INTO Logs (LogID,LogTime,Logtext,TaskID) VALUES (@0,@1,@2,@3)", conn);
+                SqlCommand addlog = new SqlCommand("INSERT INTO Logs (LogID,LogTime,Logtext,TaskID,Username) VALUES (@0,@1,@2,@3,@4)", conn);
                 SqlCommand readlogid = new SqlCommand("SELECT Max(LogID) FROM Logs");
                 int maxlogid = Int32.Parse(readlogid.ExecuteScalar().ToString());
                 maxlogid++;
@@ -746,13 +767,29 @@ namespace ConsoleApp1
                 string logtext = validation.readString("Please enter the update log for this task: ");
                 addlog.Parameters.Add(new SqlParameter("2", logtext));
                 addlog.Parameters.Add(new SqlParameter("3", taskID));
+                addlog.Parameters.Add(new SqlParameter("4", username));
                 addlog.ExecuteNonQuery();
                 Console.WriteLine("Log ID: " + maxlogid + " added for task ID: " + taskID);
             }
         }
-        public void ViewLogs()
+        public void ViewLogs(string username,int projectID)
         {
-
+            Console.WriteLine("Which of your porjects would you like to view the logs for? ");
+            using (SqlConnection conn = new SqlConnection())
+            {
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
+                conn.Open();
+                SqlCommand getlogs = new SqlCommand("SELECT * FROM Logs WHERE Username = @0", conn);
+                getlogs.Parameters.Add(new SqlParameter("0", username));
+                using (SqlDataReader reader = getlogs.ExecuteReader())
+                {
+                    Console.WriteLine("LogID|Log Date and Time|Made By|For Task|Log text");
+                    while (reader.Read())
+                    {
+                        Console.WriteLine(String.Format("{0}|{1}|{2}\t|{3}\t|{4}", reader[0], reader[1], reader[4], reader[3], reader[2]));
+                    }
+                }
+            }
         }
     }
     class Notifications
