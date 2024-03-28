@@ -425,35 +425,69 @@ namespace ConsoleApp1
                 {
                     case 1:
                         string newname = validation.readString("Please enter the new name: ");
-                        changename();
+                        changename(newname,conn,edittaskid);
                         break;
                     case 2:
                         string newuser = validation.readString("Please enter the name of the new assigned member: ");
-                        changemember();
+                        changemember(newuser,conn,edittaskid);
                         break;
                     case 3:
-                        changestatus();
+                        changestatus(conn,edittaskid);
                         break;
                     case 4:
                         string newdesc = validation.readString("Please enter the new description: ");
-                        changedesc();
+                        changedesc(newdesc,conn,edittaskid);
                         break;
                 }
             }
         }
-        private void changename()
+        private void changename(string newname, SqlConnection conn, int taskID)
+        {
+            SqlCommand updatename = new SqlCommand("UPDATE Tasks SET TaskName = @0 WHERE TaskID = @1 ", conn);
+            updatename.Parameters.Add(new SqlParameter("0", newname));
+            updatename.Parameters.Add(new SqlParameter("1", taskID));
+            updatename.ExecuteReader();
+        }
+        private void changemember(string newuser, SqlConnection conn, int taskID)
+        {
+            List<string> usernames = new List<string>();
+            SqlCommand readnames = new SqlCommand("SELECT Username FROM Logins",conn);
+            using (SqlDataReader reader = readnames.ExecuteReader())
+            {
+                Console.WriteLine("Current List of users: ");
+                while (reader.Read())
+                {
+                    usernames.Add(reader[0].ToString());
+                    Console.WriteLine(reader[0].ToString());
+                }
+            }
+            bool valid = false;
+            while (!valid)
+            {
+                for (int i = 0; i < usernames.Count; i++)
+                {
+                    if (newuser == usernames[i])
+                    {
+                        valid = true;
+                    }
+                }
+                if (!valid)
+                {
+                    Console.WriteLine("User not found in list of users please enter a different name");
+                    newuser = validation.readString("Please enter a user to assign to the task");
+                }
+            }
+            SqlCommand changemember = new SqlCommand("UPDATE Tasks SET AssignedMember = @0 WHERE TaskID = @1", conn);
+            changemember.Parameters.Add(new SqlParameter("0", newuser));
+            changemember.Parameters.Add(new SqlParameter("1", taskID));
+            changemember.ExecuteNonQuery();
+            Console.WriteLine("Assigned changed to " + newuser + " for Task ID: " + taskID);
+        }
+        private void changestatus(SqlConnection conn, int taskID)
         {
 
         }
-        private void changemember()
-        {
-
-        }
-        private void changestatus()
-        {
-
-        }
-        private void changedesc()
+        private void changedesc(string newdesc, SqlConnection conn, int taskID)
         {
 
         }
@@ -951,8 +985,7 @@ namespace ConsoleApp1
                                 
                             
                             }
-                        }
-                        assignedmember = AddMemberToTask(conn,ListofMembers);
+                        }                       
                         bool exit = false;
                         while (!exit)
                         {
