@@ -8,6 +8,7 @@ using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 using System.CodeDom;
+using System.Runtime.CompilerServices;
 
 namespace ConsoleApp1
 {
@@ -57,7 +58,7 @@ namespace ConsoleApp1
                     case 2:
                         if (usertype == "user")
                         {
-                            user.ViewUsersProjects(username);
+                            user.ViewUsersProjects(username); // From this allow a user to edit a project if they are the owner of the project
                         }
                         else if(usertype == "admin")
                         {                            
@@ -241,11 +242,13 @@ namespace ConsoleApp1
     }
     class User
     {
+        private Validation validation = new Validation();
         private string UserName;    
         private string UserPassword;
         private bool onProject;
         public User()
         {
+            
             this.UserName = "";           
             this.UserPassword = "";
             this.onProject = false;
@@ -332,10 +335,64 @@ namespace ConsoleApp1
                         }
                     }
                     getprojectinfo.Parameters.Clear();
+                }                                                             
+            }
+            int ans = 0;
+            while (ans !=3)
+            {
+                Console.WriteLine("What would you like to do?\n1) View a projects tasks\n2) Edit a project you are the owner of\n3) Return to menu");
+                ans = validation.CheckIntString("Enter your choice (1-3): ", 1, 3);
+                switch (ans)
+                {
+                    case 1:
+                        int ans2 = validation.CheckIntString("\nPlease enter the project ID you wish to view the tasks of: ", 1, projectidsnodupes.Last());
+                        for (int i = 0; i < projectidsnodupes.Count; i++) // stops user from accessing a project they know exists but cant see
+                        {
+                            if (ans2 == projectidsnodupes[i])
+                            {
+                                ViewProjectTasks(ans2, username);
+                            }
+                            else
+                            {
+                                Console.WriteLine("You do not have access to this project returning to menu");
+                            }
+                            
+                        }
+                        
+                        break;
+                    case 2:
+                        int ans3 = validation.CheckIntString("\nPlease enter the project ID you wish to edit that you are the owner of: ", 1, projectidsnodupes.Last());
+                        EditProject(ans3,username);
+                        break;
+                    default:
+                        break;
                 }
-                
-                
-                              
+            }            
+        }
+        private void ViewProjectTasks(int projectID,string username)
+        {
+            using (SqlConnection conn = new SqlConnection())
+            {
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
+                conn.Open();
+                SqlCommand gettasks = new SqlCommand("SELECT * FROM Tasks WHERE ProjectID = @0", conn);
+                gettasks.Parameters.Add(new SqlParameter("0", projectID));
+                using (SqlDataReader reader = gettasks.ExecuteReader())
+                {
+                    Console.WriteLine("Task ID|Task Name|Project ID|Assigned Team Member|Status|Description");
+                    while (reader.Read())
+                    {
+                        Console.WriteLine(String.Format("{0}\t | {1}\t | {2}\t | {3}\t | {4}\t | {5}", reader[0], reader[1], reader[2], reader[3], reader[4], reader[5]));
+                    }
+                }                
+            }
+        }
+        private void EditProject(int projectID,string username)
+        {
+            using (SqlConnection conn = new SqlConnection())
+            {
+                conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
+                conn.Open();
             }
         }
     }
@@ -833,6 +890,7 @@ namespace ConsoleApp1
                             
                             }
                         }
+                        assignedmember = AddMemberToTask(conn,ListofMembers);
                         bool exit = false;
                         while (!exit)
                         {
@@ -869,7 +927,7 @@ namespace ConsoleApp1
                 }
             
             }
-        } //create a function to add members that can be called by the project leader
+        } //create a function to add members that can be called by the project leader        
         public void Placeholder()
         {
             string[] tasks;
