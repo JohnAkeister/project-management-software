@@ -119,8 +119,8 @@ namespace ConsoleApp1
             {
                 conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
                 conn.Open();
-                SqlCommand command1 = new SqlCommand("SELECT UserID, Username, IsAdmin FROM Logins", conn);
-                SqlDataReader reader = command1.ExecuteReader();
+                SqlCommand getuserscommand = new SqlCommand("SELECT UserID, Username, IsAdmin FROM Logins", conn);
+                SqlDataReader reader = getuserscommand.ExecuteReader();
                 Console.WriteLine("UserID\tUsername\tIsAdmin?");
                 while (reader.Read())
                 {
@@ -265,9 +265,9 @@ namespace ConsoleApp1
                 conn.Open();
                 try
                 {
-                    SqlCommand command = new SqlCommand("SELECT * FROM Logins WHERE Username = @0", conn); // extracts from DB when the username is valid
-                    command.Parameters.Add(new SqlParameter("0", UserName));
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    SqlCommand loginscommand = new SqlCommand("SELECT * FROM Logins WHERE Username = @0", conn); // extracts from DB when the username is valid
+                    loginscommand.Parameters.Add(new SqlParameter("0", UserName));
+                    using (SqlDataReader reader = loginscommand.ExecuteReader())
                     {
                         
                         while (reader.Read())
@@ -329,7 +329,7 @@ namespace ConsoleApp1
 
                 }
                 
-                SqlCommand getprojectinfo = new SqlCommand("SELECT * FROM Projects WHERE ProjectID = @0",conn);
+                SqlCommand getprojectinfo = new SqlCommand("SELECT * FROM Projects WHERE ProjectID = @0 AND ProjectID > @1",conn);
                 int[] projectidarry = new int[projectidsnodupes.Count];
                 projectidsnodupes.Sort();
                 Console.WriteLine("ProjectID|ProjectName|Project Status|Number of Tasks|Number of Members|Percentage Complete|Project Owner");
@@ -338,6 +338,7 @@ namespace ConsoleApp1
                 {
                     projectID = projectidsnodupes[i];
                     getprojectinfo.Parameters.Add(new SqlParameter("0", projectID));
+                    getprojectinfo.Parameters.Add(new SqlParameter("1", "0"));
                     using (SqlDataReader reader = getprojectinfo.ExecuteReader())
                     {
                         while (reader.Read())
@@ -409,8 +410,9 @@ namespace ConsoleApp1
             {
                 conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
                 conn.Open();
-                SqlCommand gettasks = new SqlCommand("SELECT * FROM Tasks WHERE ProjectID = @0", conn);
+                SqlCommand gettasks = new SqlCommand("SELECT * FROM Tasks WHERE ProjectID = @0 AND TaskID > @1 AND ProjectID > @1", conn);
                 gettasks.Parameters.Add(new SqlParameter("0", projectID));
+                gettasks.Parameters.Add(new SqlParameter("1", "0"));
                 using (SqlDataReader reader = gettasks.ExecuteReader())
                 {
                     Console.WriteLine("Task ID|Task Name|Project ID|Assigned Team Member|Status|Description");
@@ -457,7 +459,7 @@ namespace ConsoleApp1
                 edittaskid = validation.CheckIntString("Which task would you like to edit?: ", mintaskid, maxtaskid);
                 SqlCommand gettask = new SqlCommand("SELECT * FROM Tasks WHERE TaskID = @0", conn);
                 gettask.Parameters.Add(new SqlParameter("0", edittaskid));
-                Console.WriteLine("Which Parameter woudl you like to update: \n1) Task Name\n2) Assigned Member\n3) Status\n4) Description");
+                Console.WriteLine("Which Parameter would you like to update: \n1) Task Name\n2) Assigned Member\n3) Status\n4) Description");
                 int ans = validation.CheckIntString("Please enter your choice (1-4): ", 1, 4);
                 switch (ans)
                 {
@@ -697,11 +699,11 @@ namespace ConsoleApp1
             using (SqlConnection conn = new SqlConnection())
             {
                 conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
-                SqlCommand command = new SqlCommand("Update Logins SET Username = @0 WHERE UserID = @1 ", conn);
-                command.Parameters.Add(new SqlParameter("0", newname));
-                command.Parameters.Add(new SqlParameter("1", UserID));
+                SqlCommand updateloginscommand = new SqlCommand("Update Logins SET Username = @0 WHERE UserID = @1 ", conn);
+                updateloginscommand.Parameters.Add(new SqlParameter("0", newname));
+                updateloginscommand.Parameters.Add(new SqlParameter("1", UserID));
                 conn.Open();
-                command.ExecuteNonQuery();
+                updateloginscommand.ExecuteNonQuery();
                 Console.WriteLine("Username updated for UserID: " + UserID);
             }
         }
@@ -711,11 +713,11 @@ namespace ConsoleApp1
             using (SqlConnection conn = new SqlConnection())
             {
                 conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
-                SqlCommand command = new SqlCommand("Update Logins SET Password = @0 WHERE UserID = @1 ",conn);
-                command.Parameters.Add(new SqlParameter("0", newpass));
-                command.Parameters.Add(new SqlParameter("1", UserID));
+                SqlCommand updatepasscommand = new SqlCommand("Update Logins SET Password = @0 WHERE UserID = @1 ",conn);
+                updatepasscommand.Parameters.Add(new SqlParameter("0", newpass));
+                updatepasscommand.Parameters.Add(new SqlParameter("1", UserID));
                 conn.Open();
-                command.ExecuteNonQuery();
+                updatepasscommand.ExecuteNonQuery();
                 Console.WriteLine("Password updated for UserID: " + UserID);
             }
         }
@@ -725,7 +727,7 @@ namespace ConsoleApp1
             {
                 conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
                 conn.Open();
-                SqlCommand command = new SqlCommand("Update Logins SET IsAdmin = @0 WHERE UserID = @1 ",conn);
+                SqlCommand updateadmincommand = new SqlCommand("Update Logins SET IsAdmin = @0 WHERE UserID = @1 ",conn);
                 SqlCommand adminget = new SqlCommand("SELECT IsAdmin FROM Logins WHERE UserID = @1",conn);
                 adminget.Parameters.Add(new SqlParameter("1", UserID));
                 char readin = char.Parse(adminget.ExecuteScalar().ToString());
@@ -738,10 +740,10 @@ namespace ConsoleApp1
                 {
                     readin = 'N';
                 }
-                command.Parameters.Add(new SqlParameter("0", readin));
-                command.Parameters.Add(new SqlParameter("1", UserID));
+                updateadmincommand.Parameters.Add(new SqlParameter("0", readin));
+                updateadmincommand.Parameters.Add(new SqlParameter("1", UserID));
                 
-                command.ExecuteNonQuery();
+                updateadmincommand.ExecuteNonQuery();
                 Console.WriteLine("Admin status updated for UserID: " + UserID);
             }
         }
@@ -800,12 +802,13 @@ namespace ConsoleApp1
                         ListOfIds.Add(int.Parse(reader[0].ToString()));
                     }
                 }
-                SqlCommand getlogs = new SqlCommand("SELECT * FROM Logs WHERE Username = @0 AND TaskID = @1", conn);
+                SqlCommand getlogs = new SqlCommand("SELECT * FROM Logs WHERE Username = @0 AND TaskID = @1 AND LogID > @2", conn);
                 
                 for (int i = 0; i < ListOfIds.Count; i++)
                 {
                     getlogs.Parameters.Add(new SqlParameter("0", username));
                     getlogs.Parameters.Add(new SqlParameter("1", ListOfIds[i]));
+                    getlogs.Parameters.Add(new SqlParameter("2", "0"));
                     using (SqlDataReader reader = getlogs.ExecuteReader())
                     {
                         Console.WriteLine("LogID|Log Date and Time|Made By|For Task|Log text");
