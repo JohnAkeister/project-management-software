@@ -54,7 +54,7 @@ namespace ConsoleApp1
                 switch (ans)
                 {
                     case 1:
-                        project.ViewProjects(usertype);
+                        project.ViewProjects(usertype,username);
                         break;
                     case 2:
                         if (usertype == "user")
@@ -357,7 +357,7 @@ namespace ConsoleApp1
                             {
                                 if (ans2 == projectidsnodupes[i])
                                 {
-                                    ViewProjectTasks(ans2, username);
+                                    ViewProjectTasks(ans2);
                                     valid = true;
                                 }
                             }
@@ -396,7 +396,7 @@ namespace ConsoleApp1
                 }
             }            
         }
-        private void ViewProjectTasks(int projectID,string username)
+        public void ViewProjectTasks(int projectID)
         {
             using (SqlConnection conn = new SqlConnection())
             {
@@ -425,7 +425,7 @@ namespace ConsoleApp1
                 string ProjectOwner = getproject.ExecuteScalar().ToString();
                 if (username == ProjectOwner)
                 {
-                    ViewProjectTasks(projectID, username);
+                    ViewProjectTasks(projectID);
                     EditTask(projectID,username);
                 }
                 else
@@ -434,7 +434,7 @@ namespace ConsoleApp1
                 }
             }
         }
-        private void EditTask(int projectID, string username)
+        public void EditTask(int projectID, string username)
         {
             int edittaskid;
             using (SqlConnection conn = new SqlConnection())
@@ -822,6 +822,7 @@ namespace ConsoleApp1
     class Project
     {
         Validation validation = new Validation();
+        private User user = new User();
         private List<Task> ListOfTasks;
         private string Status;
         private string ProjectName;
@@ -832,7 +833,7 @@ namespace ConsoleApp1
         private string ProjectOwner;
         private int zero = 0;
 
-        public void ViewProjects(string usertype)
+        public void ViewProjects(string usertype,string username)
         {
             using (SqlConnection conn = new SqlConnection())
             {
@@ -862,7 +863,7 @@ namespace ConsoleApp1
                         DeleteProject();
                         break;
                     case 3:
-                        EditProject();
+                        EditProject(username);
                         break;
                     case 4:
                         break;
@@ -939,7 +940,7 @@ namespace ConsoleApp1
                 }
             }
         }
-        public void EditProject()
+        public void EditProject(string username)
         {
             int projectID;
             Console.WriteLine();
@@ -960,6 +961,7 @@ namespace ConsoleApp1
                         EditProjectStatus(projectID);
                         break;
                     case 4:
+                        EditProjectTasks(projectID,username);
                         break;
                     default:
                         valid = true;
@@ -1122,10 +1124,13 @@ namespace ConsoleApp1
                 Console.WriteLine("Project " + projectID + " ID status has been changed from " + currentstatus + " to " + newstatus);
             }
         }
-        private void EditProjectTasks(int projectID)
+        private void EditProjectTasks(int projectID,string username)
         {
-
+            user.ViewProjectTasks(projectID);
+            Console.WriteLine("Which task would you like to edit?: ");
+            user.EditTask(projectID,username);
         }
+        
         private void AddTask(int projectID)
         {
             List<string> ListofMembers = new List<string>();
