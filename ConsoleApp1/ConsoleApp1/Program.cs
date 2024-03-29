@@ -228,7 +228,7 @@ namespace ConsoleApp1
         }
         
     }
-    class User
+    public class User
     {        
         private Project project = new Project();
         private Logs logs = new Logs();
@@ -303,39 +303,48 @@ namespace ConsoleApp1
             int projectID = 0;
             using (SqlConnection conn = new SqlConnection())
             {
-                conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
-                conn.Open();
-                SqlCommand getuserprojects = new SqlCommand("SELECT ProjectID FROM Tasks WHERE AssignedMember = @0 ",conn);
-                getuserprojects.Parameters.Add(new SqlParameter("0", username));
-                using (SqlDataReader reader = getuserprojects.ExecuteReader())
+                try
                 {
-                    while (reader.Read())
-                    {
-                        projectids.Add(Convert.ToInt32(reader[0].ToString()));
-                    }
-                    projectidsnodupes = projectids.Distinct().ToList();
 
-                }
                 
-                SqlCommand getprojectinfo = new SqlCommand("SELECT * FROM Projects WHERE ProjectID = @0 AND ProjectID > @1",conn);
-                int[] projectidarry = new int[projectidsnodupes.Count];
-                projectidsnodupes.Sort();
-                Console.WriteLine("ProjectID|ProjectName|Project Status|Number of Tasks|Number of Members|Percentage Complete|Project Owner");
-                
-                for (int i = 0; i < projectidsnodupes.Count; i++)
-                {
-                    projectID = projectidsnodupes[i];
-                    getprojectinfo.Parameters.Add(new SqlParameter("0", projectID));
-                    getprojectinfo.Parameters.Add(new SqlParameter("1", "0"));
-                    using (SqlDataReader reader = getprojectinfo.ExecuteReader())
+                    conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
+                    conn.Open();
+                    SqlCommand getuserprojects = new SqlCommand("SELECT ProjectID FROM Tasks WHERE AssignedMember = @0 ",conn);
+                    getuserprojects.Parameters.Add(new SqlParameter("0", username));
+                    using (SqlDataReader reader = getuserprojects.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            Console.WriteLine(String.Format("{0} \t | {1} \t | {2} \t | {3} \t | {4} \t | {5} \t | {6}", reader[0], reader[1], reader[2], reader[3], reader[4], reader[5], reader[6]));
+                            projectids.Add(Convert.ToInt32(reader[0].ToString()));
                         }
+                        projectidsnodupes = projectids.Distinct().ToList();
+
                     }
-                    getprojectinfo.Parameters.Clear();
-                }                                                             
+                
+                    SqlCommand getprojectinfo = new SqlCommand("SELECT * FROM Projects WHERE ProjectID = @0 AND ProjectID > @1",conn);
+                    int[] projectidarry = new int[projectidsnodupes.Count];
+                    projectidsnodupes.Sort();
+                    Console.WriteLine("ProjectID|ProjectName|Project Status|Number of Tasks|Number of Members|Percentage Complete|Project Owner");
+                
+                    for (int i = 0; i < projectidsnodupes.Count; i++)
+                    {
+                        projectID = projectidsnodupes[i];
+                        getprojectinfo.Parameters.Add(new SqlParameter("0", projectID));
+                        getprojectinfo.Parameters.Add(new SqlParameter("1", "0"));
+                        using (SqlDataReader reader = getprojectinfo.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                Console.WriteLine(String.Format("{0} \t | {1} \t | {2} \t | {3} \t | {4} \t | {5} \t | {6}", reader[0], reader[1], reader[2], reader[3], reader[4], reader[5], reader[6]));
+                            }
+                        }
+                        getprojectinfo.Parameters.Clear();
+                    }
+                }
+                catch (SqlException er)
+                {
+                    Console.WriteLine(er.Message);
+                }
             }
             int ans = 0;
             while (ans !=3)
