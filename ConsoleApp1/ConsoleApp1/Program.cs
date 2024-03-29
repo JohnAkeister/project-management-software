@@ -15,18 +15,18 @@ namespace ConsoleApp1
 {
     class Program
     {
-        static Validation validation = new Validation();
-        static Display display = new Display();
-        static Login login = new Login();
-        static Admin admin = new Admin();
-        static Project project = new Project();
-        static User user = new User();
-        static Logs logs = new Logs();
-        static Notifications notifs = new Notifications();
-        static string usertype;
-        static string username;
-        static int maxusermenu = 5;
-        static int maxadminmenu = 5;
+        private static Validation validation = new Validation();
+        private static Display display = new Display();
+        private static Login login = new Login();
+        private static Admin admin = new Admin();
+        private static Project project = new Project();
+        private static User user = new User();
+        private static Logs logs = new Logs();
+        private static Notifications notifs = new Notifications();
+        private static string usertype;
+        private static string username;
+        private static int maxusermenu = 4;
+        private static int maxadminmenu = 4;
         static void Main()
         {
             BeginProgram();                    
@@ -93,12 +93,12 @@ namespace ConsoleApp1
                 }
             }
         }
-        static void DisplayUserMenu()
+        private static void DisplayUserMenu()
         {
             Console.WriteLine("User Menu for "+username+": ");
             Console.WriteLine("\n1) View all Projects\n2) View your Projects\n3) View your notifications\n4) Exit");
         }
-        static void DisplayAdminMenu()
+        private static void DisplayAdminMenu()
         {
             Console.WriteLine("Admin Menu for " + username + ": ");
             Console.WriteLine("\n1) View all Projects\n2) View all Members\n3) View your notifications\n4) Exit");
@@ -108,18 +108,15 @@ namespace ConsoleApp1
     }
     class Display
     {
-        Validation validation = new Validation();
-        public void DisplayNotification()
-        {
-
-        }
+        Validation validation = new Validation();       
         public int DisplayUsers() // displays all users to the admin
         {
             using (SqlConnection conn = new SqlConnection()) 
             {
                 conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
                 conn.Open();
-                SqlCommand getuserscommand = new SqlCommand("SELECT UserID, Username, IsAdmin FROM Logins", conn);
+                SqlCommand getuserscommand = new SqlCommand("SELECT UserID, Username, IsAdmin FROM Logins WHERE UserID > @0", conn);
+                getuserscommand.Parameters.Add(new SqlParameter("0", "0"));
                 SqlDataReader reader = getuserscommand.ExecuteReader();
                 Console.WriteLine("UserID\tUsername\tIsAdmin?");
                 while (reader.Read())
@@ -148,7 +145,7 @@ namespace ConsoleApp1
         }
     }
 
-    class Validation
+    public class Validation
     {
         public string readString(string prompt)//checks for null entry
         {
@@ -229,16 +226,7 @@ namespace ConsoleApp1
             }
             
         }
-        private void AdminLogin()
-        { /* Potentially not necessary
-            bool valid = false;
-            while (!valid)
-            {
-                string username = validation.readString("\nPlease enter your UserName: ");
-                string password = validation.readString("\nPlease enter your Password: ");
-                
-            }*/
-        }
+        
     }
     class User
     {        
@@ -875,16 +863,13 @@ namespace ConsoleApp1
     }
     class Project
     {        
-       
-        private List<Task> ListOfTasks;
-        private string Status;
-        private string ProjectName;
-        private int ProjectID;
+             
+        private string ProjectName;        
         private int PercentComplete;
         private int NumofTasks;
         private int NumofMembers;
         private string ProjectOwner;
-        private int zero = 0;
+        private const int zero = 0;
 
         public void ViewProjects(string usertype,string username, Validation validation, User user)
         {
