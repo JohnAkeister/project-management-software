@@ -17,15 +17,9 @@ namespace UnitTestProject1
             Assert.AreEqual(intTest.ReadInt(enteredstring), int.Parse(enteredstring));
         }
 
-        [TestMethod()]
-        public void SetUpUserTest()
-        {
-            throw new NotImplementedException();
-        }
-
-        [TestMethod()]
+        [TestMethod()]        
         [Timeout(2000)]
-        public void ViewUsersProjectsTest_invalid()
+        public void ViewUsersProjectsTest_invalid() // fails but fails correctly
         {
             string notvalid = "Not Valid";
             var projecttest = new ConsoleApp1.User();
@@ -61,11 +55,11 @@ namespace UnitTestProject1
         [Timeout(3000)]
         public void ViewProjectTasksTest_valid()
         {
-            int notvalid = 1;
+            int valid = 1;
             var projecttest = new ConsoleApp1.User();
             try
             {
-                projecttest.ViewProjectTasks(notvalid);
+                projecttest.ViewProjectTasks(valid);
             }
             catch (Exception e)
             {
@@ -82,6 +76,58 @@ namespace UnitTestProject1
             try
             {
                 projecttest.ViewProjectTasks(notvalid);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+
+        [TestMethod()]
+        public void ViewLogsTest_valid()
+        {
+            int valid = 1;
+            string validname = "John";
+            var projecttest = new ConsoleApp1.Logs();
+            try
+            {
+                projecttest.ViewLogs(validname,valid);
+            }
+            catch (Exception e)
+            {
+
+                Console.WriteLine(e.Message);
+            }
+        }
+        [TestMethod()]
+        [Timeout(3000)]
+        public void ViewLogsTest_invalid()
+        {
+            int valid = 1;
+            int invalidnum = 9990;
+            string invalidname = "Paul";
+            var projecttest = new ConsoleApp1.Logs();
+            try
+            {
+                projecttest.ViewLogs(invalidname, valid);
+            }
+            catch (Exception e)
+            {
+
+                Console.WriteLine(e.Message);
+            }
+        }
+        [TestMethod()]
+        [Timeout(3000)]
+        public void ViewLogsTest_invalid2()
+        {
+            
+            int invalidnum = 9990;
+            string validname = "John";
+            var projecttest = new ConsoleApp1.Logs();
+            try
+            {
+                projecttest.ViewLogs(validname, invalidnum);
             }
             catch (Exception e)
             {

@@ -754,7 +754,7 @@ namespace ConsoleApp1
     command1.Parameters.Add(new SqlParameter("0", UserID));
                 command1.Parameters.Add(new SqlParameter("1", UserName)); code to create new user, will be useful for admin class
                 command1.Parameters.Add(new SqlParameter("2", UserPassword));*/ 
-    class Logs
+    public class Logs
     {
         
         public void AddLog(int taskID, string username,Validation validation)
