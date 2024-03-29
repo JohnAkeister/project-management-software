@@ -25,9 +25,26 @@ namespace UnitTestProject1
 
         [TestMethod()]
         [Timeout(2000)]
-        public void ViewUsersProjectsTest_valid()
+        public void ViewUsersProjectsTest_invalid()
         {
             string notvalid = "Not Valid";
+            var projecttest = new ConsoleApp1.User();
+            try
+            {
+                projecttest.ViewUsersProjects(notvalid, validation);
+            }
+            catch (Exception e)
+            {
+
+                Console.WriteLine(e.Message);
+            }
+        }
+
+        [TestMethod()]
+        [Timeout(3000)]
+        public void ViewUsersProjectsTest_valid() // Does pass test to display all the users project
+        {
+            string notvalid = "John";
             var projecttest = new ConsoleApp1.User();
             try
             {

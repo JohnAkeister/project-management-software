@@ -296,7 +296,7 @@ namespace ConsoleApp1
 
             }
         }
-        public void ViewUsersProjects(string username, Validation validation)
+        public void ViewUsersProjects(string username, Validation validation) // does pass test to display the valid users projects
         {
             List<int> projectids = new List<int>();
             List<int> projectidsnodupes = new List<int>();
