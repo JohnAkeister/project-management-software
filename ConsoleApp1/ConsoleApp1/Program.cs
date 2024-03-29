@@ -106,7 +106,7 @@ namespace ConsoleApp1
 
 
     }
-    class Display
+    public class Display
     {
         Validation validation = new Validation();       
         public int DisplayUsers() // displays all users to the admin

@@ -177,7 +177,7 @@ namespace UnitTestProject1
             var projecttest = new ConsoleApp1.Project();
             try
             {
-                projecttest.ViewProjects(usertype, validname,validation,user);
+                projecttest.ViewProjects(usertype, validname, validation, user);
             }
             catch (Exception e)
             {
@@ -186,6 +186,19 @@ namespace UnitTestProject1
             }
         }
         [TestMethod()]
-        
+        [Timeout (3000)]
+        public void DisplayUsersTest() // does pass but requires in function input
+        {
+            var displayusertest = new ConsoleApp1.Display();
+            try
+            {
+                displayusertest.DisplayUsers();
+            }
+            catch (Exception e)
+            {
+
+                Console.WriteLine(e.Message);
+            }
+        }
     }
 }
