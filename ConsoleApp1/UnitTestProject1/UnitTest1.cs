@@ -56,5 +56,38 @@ namespace UnitTestProject1
                 Console.WriteLine(e.Message);
             }
         }
+
+        [TestMethod()]
+        [Timeout(3000)]
+        public void ViewProjectTasksTest_valid()
+        {
+            int notvalid = 1;
+            var projecttest = new ConsoleApp1.User();
+            try
+            {
+                projecttest.ViewProjectTasks(notvalid);
+            }
+            catch (Exception e)
+            {
+
+                Console.WriteLine(e.Message);
+            }
+        }
+        [TestMethod()]
+        [Timeout(3000)]
+        public void ViewProjectTasksTest_invalid()
+        {
+            int notvalid = 0;
+            var projecttest = new ConsoleApp1.User();
+            try
+            {
+                projecttest.ViewProjectTasks(notvalid);
+            }
+            catch (Exception e)
+            {
+
+                Console.WriteLine(e.Message);
+            }
+        }
     }
 }
