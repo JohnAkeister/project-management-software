@@ -825,7 +825,7 @@ namespace ConsoleApp1
             }
         }
     }
-    class Notifications
+    public class Notifications
     {
         public void NewNotification(int logID, Validation validation)
         {

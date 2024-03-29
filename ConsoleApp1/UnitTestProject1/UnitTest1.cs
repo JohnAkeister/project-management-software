@@ -17,7 +17,7 @@ namespace UnitTestProject1
             Assert.AreEqual(intTest.ReadInt(enteredstring), int.Parse(enteredstring));
         }
 
-        [TestMethod()]        
+        [TestMethod()]
         [Timeout(2000)]
         public void ViewUsersProjectsTest_invalid() // fails but fails correctly
         {
@@ -91,7 +91,7 @@ namespace UnitTestProject1
             var projecttest = new ConsoleApp1.Logs();
             try
             {
-                projecttest.ViewLogs(validname,valid);
+                projecttest.ViewLogs(validname, valid);
             }
             catch (Exception e)
             {
@@ -121,13 +121,45 @@ namespace UnitTestProject1
         [Timeout(3000)]
         public void ViewLogsTest_invalid2()
         {
-            
+
             int invalidnum = 9990;
             string validname = "John";
             var projecttest = new ConsoleApp1.Logs();
             try
             {
                 projecttest.ViewLogs(validname, invalidnum);
+            }
+            catch (Exception e)
+            {
+
+                Console.WriteLine(e.Message);
+            }
+        }
+
+        [TestMethod()]
+        public void ViewNotificationsTest_Valid()
+        {            
+            string validname = "John";
+            var projecttest = new ConsoleApp1.Notifications();
+            try
+            {
+                projecttest.ViewNotifications(validation,validname);
+            }
+            catch (Exception e)
+            {
+
+                Console.WriteLine(e.Message);
+            }
+        }
+        [TestMethod()]
+        [Timeout (3000)]
+        public void ViewNotificationsTest_InValid()
+        {
+            string invalidname = "Not Valid";
+            var projecttest = new ConsoleApp1.Notifications();
+            try
+            {
+                projecttest.ViewNotifications(validation, invalidname);
             }
             catch (Exception e)
             {
