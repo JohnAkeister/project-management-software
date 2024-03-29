@@ -188,7 +188,7 @@ namespace ConsoleApp1
             return result;
         }
     }
-    class Login
+    public class Login
     {
         
         private User user = new User();

@@ -1,16 +1,20 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using ConsoleApp1;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.IO;
 
 namespace UnitTestProject1
 {
     [TestClass]
     public class UnitTest1
-    {
-        [TestMethod]
-        public void TestMethod1()
+    {       
+
+        [TestMethod()]
+        public void ReadIntTest()
         {
-            var readinttest = new ConsoleApp1.Validation();
-            Assert.AreEqual(readinttest.ReadInt("123"), 123);
+            string enteredstring = "123";
+            var intTest = new ConsoleApp1.Validation();
+            Assert.AreEqual(intTest.ReadInt(enteredstring), int.Parse(enteredstring));
         }
     }
 }
