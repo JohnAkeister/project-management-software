@@ -187,7 +187,7 @@ namespace UnitTestProject1
         }
         [TestMethod()]
         [Timeout (3000)]
-        public void DisplayUsersTest() // does pass but requires in function input
+        public void DisplayUsersTest() // does pass but requires in function input 
         {
             var displayusertest = new ConsoleApp1.Display();
             try
