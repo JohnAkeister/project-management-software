@@ -13,11 +13,21 @@
   ],
   "DocumentGroupContainers": [
     {
-      "Orientation": 0,
+      "Orientation": 1,
       "VerticalTabListWidth": 256,
       "DocumentGroups": [
         {
-          "DockedWidth": 200,
+          "DockedHeight": 200,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{e1b7d1f8-9b3c-49b1-8f4f-bfc63a88835d}"
+            }
+          ]
+        },
+        {
+          "DockedHeight": 200,
           "SelectedChildIndex": 1,
           "Children": [
             {
@@ -32,7 +42,7 @@
               "RelativeDocumentMoniker": "UnitTestProject1\\UnitTest1.cs",
               "ToolTip": "G:\\Software Engineering\\SOFT40141\\Coursework\\ConsoleApp1\\UnitTestProject1\\UnitTest1.cs*",
               "RelativeToolTip": "UnitTestProject1\\UnitTest1.cs*",
-              "ViewState": "AQIAAJMAAAAAAAAAAAAkwJoAAAAYAAAA",
+              "ViewState": "AQIAALUAAAAAAAAAAAAkwLsAAAAWAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-03-29T11:16:48.713Z",
               "EditorCaption": ""
@@ -45,7 +55,7 @@
               "RelativeDocumentMoniker": "ConsoleApp1\\Program.cs",
               "ToolTip": "G:\\Software Engineering\\SOFT40141\\Coursework\\ConsoleApp1\\ConsoleApp1\\Program.cs",
               "RelativeToolTip": "ConsoleApp1\\Program.cs",
-              "ViewState": "AQIAAO8CAAAAAAAAAAAYwFUDAAAaAAAA",
+              "ViewState": "AQIAAG4DAAAAAAAAAADwv3kDAABIAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-03-26T13:26:24.273Z",
               "EditorCaption": ""

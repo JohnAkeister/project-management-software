@@ -870,7 +870,7 @@ namespace ConsoleApp1
             }
         }
     }
-    class Project
+    public class Project
     {        
              
         private string ProjectName;        
@@ -887,7 +887,7 @@ namespace ConsoleApp1
                 conn.ConnectionString = "Server=localhost\\SQLEXPRESS02 ;Database=SQLDB ; Trusted_Connection=true";
                 conn.Open();
                 SqlCommand readprojects = new SqlCommand("SELECT ProjectID,ProjectName,Status,NumberOfTasks,ProjectOwner, PercentComplete FROM Projects WHERE ProjectID > @0",conn);
-                readprojects.Parameters.Add(new SqlParameter("0", zero));
+                readprojects.Parameters.Add(new SqlParameter("0", "0"));
                 using (SqlDataReader reader = readprojects.ExecuteReader())
                 {
                     Console.WriteLine("ProjectID|Project Name\t|Project Status\t|Number of Tasks|Project Owner| Percent Complete");

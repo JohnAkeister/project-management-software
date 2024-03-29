@@ -9,6 +9,7 @@ namespace UnitTestProject1
     public class UnitTest1
     {
         private Validation validation = new Validation();
+        private User user = new User();
         [TestMethod()]
         public void ReadIntTest()
         {
@@ -138,12 +139,12 @@ namespace UnitTestProject1
 
         [TestMethod()]
         public void ViewNotificationsTest_Valid()
-        {            
+        {
             string validname = "John";
             var projecttest = new ConsoleApp1.Notifications();
             try
             {
-                projecttest.ViewNotifications(validation,validname);
+                projecttest.ViewNotifications(validation, validname);
             }
             catch (Exception e)
             {
@@ -152,7 +153,7 @@ namespace UnitTestProject1
             }
         }
         [TestMethod()]
-        [Timeout (3000)]
+        [Timeout(3000)]
         public void ViewNotificationsTest_InValid()
         {
             string invalidname = "Not Valid";
@@ -167,5 +168,24 @@ namespace UnitTestProject1
                 Console.WriteLine(e.Message);
             }
         }
+
+        [TestMethod()]
+        public void ViewProjectsTest_Valid()
+        {
+            string validname = "John";
+            string usertype = "user";
+            var projecttest = new ConsoleApp1.Project();
+            try
+            {
+                projecttest.ViewProjects(usertype, validname,validation,user);
+            }
+            catch (Exception e)
+            {
+
+                Console.WriteLine(e.Message);
+            }
+        }
+        [TestMethod()]
+        
     }
 }
